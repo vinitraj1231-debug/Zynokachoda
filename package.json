@@ -1,0 +1,25 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "> The production-ready static website for **Zynochat** (zynochat.in) — a premium real-time chat platform built for communities, privacy, and seamless communication.",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vinitraj1231-debug/Zynokachoda.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/vinitraj1231-debug/Zynokachoda/issues"
+  },
+  "homepage": "https://github.com/vinitraj1231-debug/Zynokachoda#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "firebase": "^12.12.0"
+  }
+}
