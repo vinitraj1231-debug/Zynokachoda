@@ -48,15 +48,15 @@
       transition: opacity .22s ease;
       border-radius: inherit;
     }
-    .cat-card.cat-brand::before   { background: linear-gradient(135deg,rgba(109,40,217,.10),rgba(139,92,246,.05)); }
-    .cat-card.cat-comp::before    { background: linear-gradient(135deg,rgba(6,182,212,.10),rgba(34,211,238,.05)); }
-    .cat-card.cat-traffic::before { background: linear-gradient(135deg,rgba(16,185,129,.10),rgba(52,211,153,.05)); }
-    .cat-card.cat-howto::before   { background: linear-gradient(135deg,rgba(245,158,11,.10),rgba(251,191,36,.05)); }
+    .cat-card.cat-brand::before   { background: var(--accent-v-dim); }
+    .cat-card.cat-comp::before    { background: var(--accent-v-dim); }
+    .cat-card.cat-traffic::before { background: var(--accent-v-dim); }
+    .cat-card.cat-howto::before   { background: var(--accent-v-dim); }
     .cat-card:hover::before { opacity: 1; }
     .cat-card:hover {
       transform: translateY(-4px);
       border-color: var(--accent-v);
-      box-shadow: 0 12px 40px rgba(109,40,217,.15);
+      box-shadow: var(--shadow-md);
     }
     .cat-icon {
       width: 44px; height: 44px;
@@ -65,10 +65,10 @@
       flex-shrink: 0;
     }
     .cat-icon svg { width: 22px; height: 22px; }
-    .cat-brand .cat-icon   { background: rgba(109,40,217,.18); }
-    .cat-comp .cat-icon    { background: rgba(6,182,212,.18); }
-    .cat-traffic .cat-icon { background: rgba(16,185,129,.18); }
-    .cat-howto .cat-icon   { background: rgba(245,158,11,.18); }
+    .cat-brand .cat-icon   { background: var(--accent-v-dim); border: 1px solid var(--border-2); }
+    .cat-comp .cat-icon    { background: var(--accent-v-dim); border: 1px solid var(--border-2); }
+    .cat-traffic .cat-icon { background: var(--accent-v-dim); border: 1px solid var(--border-2); }
+    .cat-howto .cat-icon   { background: var(--accent-v-dim); border: 1px solid var(--border-2); }
     .cat-count {
       font-size: 12px;
       color: var(--text-2);
@@ -131,27 +131,19 @@
 </head>
 <body>
 
-<nav class="nav" role="navigation" aria-label="Main navigation">
-  <div class="container">
-    <div class="nav-inner">
-      <a href="index.html" class="nav-logo" aria-label="Zynochat home">
-        <div class="logo-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M10 2C5.58 2 2 5.58 2 10c0 1.85.6 3.56 1.6 4.95L2.05 17.5a.5.5 0 00.63.63l2.55-1.55A7.96 7.96 0 0010 18c4.42 0 8-3.58 8-8s-3.58-8-8-8zm-3 6h6a.5.5 0 010 1H7a.5.5 0 010-1zm0 2.5h4a.5.5 0 010 1H7a.5.5 0 010-1z"/></svg></div>
-        Zynochat
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <h1 class="app-logo-text">Zyno</h1>
+    </div>
+    <div class="header-right">
+      <a href="profile.html" class="profile-box-link" style="display: block;">
+        <div class="profile-box"></div>
       </a>
-      <div class="nav-links">
-        <a href="index.html">Home</a><a href="features.html">Features</a><a href="compare.html">Compare</a>
-        <a href="blog.html" aria-current="page">Blog</a><a href="about.html">About</a><a href="contact.html">Contact</a>
-      </div>
-      <a href="contact.html" class="btn-nav">Get Started</a>
-      <button class="nav-hamburger" aria-label="Toggle mobile menu" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>
   </div>
-</nav>
-<div class="nav-drawer">
-  <a href="index.html">Home</a><a href="features.html">Features</a><a href="compare.html">Compare</a>
-  <a href="blog.html">Blog</a><a href="about.html">About</a><a href="contact.html">Contact</a>
-  <a href="contact.html" class="btn-nav">Get Started →</a>
-</div>
+</header>
+
 
 <!-- Page Hero -->
 <section class="page-hero" aria-labelledby="blog-h1">
@@ -209,7 +201,7 @@
         <!-- Cat 3: Search Traffic -->
         <a href="blog-traffic.html" class="cat-card cat-traffic fade-up delay-2">
           <div class="cat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           </div>
           <div>
             <div class="cat-count">10 Articles</div>
@@ -222,7 +214,7 @@
         <!-- Cat 4+5: How-To + Growth -->
         <a href="blog-howto.html" class="cat-card cat-howto fade-up delay-2">
           <div class="cat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           </div>
           <div>
             <div class="cat-count">24 Articles</div>
@@ -504,5 +496,28 @@
 </footer>
 
 <script src="script.js"></script>
+<nav class="bottom-nav" id="main-bottom-nav">
+  <a href="index.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Home</span>
+  </a>
+  <a href="chat.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>Chats</span>
+  </a>
+  <a href="ai-chat.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    <span>AI</span>
+  </a>
+  <a href="profile.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Profile</span>
+  </a>
+  <a href="settings.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>Settings</span>
+  </a>
+</nav>
+<script src="app.js" type="module"></script>
 </body>
 </html>

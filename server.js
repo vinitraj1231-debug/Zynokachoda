@@ -16,11 +16,6 @@ app.get('/chat', (req, res) => {
   res.sendFile(path.join(__dirname, 'chat.html'));
 });
 
-// Route for the admin page
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'admin.html'));
-});
-
 // Fallback for all other routes to index.html (SPA-like behavior if needed)
 app.get('/:any', (req, res, next) => {
   // If it's a file request (has extension), let static middleware handle it or 404
