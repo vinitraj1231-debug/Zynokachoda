@@ -228,7 +228,7 @@
         width: ${size}px;
         height: ${size}px;
         border-radius: 50%;
-        background: rgba(${Math.random() > 0.5 ? '124,92,252' : '0,207,238'},${Math.random() * 0.5 + 0.1});
+        background: rgba(0,0,0,${Math.random() * 0.3 + 0.1});
         left: ${Math.random() * 100}%;
         top: ${Math.random() * 100}%;
         animation: pulse-dot ${2 + Math.random() * 3}s ease-in-out infinite;

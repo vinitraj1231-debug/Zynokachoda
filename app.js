@@ -1,9 +1,13 @@
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, GithubAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Your web app's Firebase configuration
-// Replace these with your own Firebase project configuration
+// Supabase configuration
+const supabaseUrl = 'YOUR_SUPABASE_URL';
+const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Firebase configuration (Keep for Firestore until fully migrated)
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_AUTH_DOMAIN",
@@ -13,10 +17,8 @@ const firebaseConfig = {
   appId: "YOUR_APP_ID"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
 
 // Auth Logic
 const loginForm = document.getElementById('login-form');
@@ -44,47 +46,45 @@ if (toggleAuth) {
 }
 
 if (loginForm) {
-  loginForm.addEventListener('submit', (e) => {
+  loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
     if (isSignUp) {
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => window.location.href = '/chat')
-        .catch(err => alert(err.message));
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) alert(error.message);
+      else window.location.href = '/chat';
     } else {
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => window.location.href = '/chat')
-        .catch(err => alert(err.message));
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) alert(error.message);
+      else window.location.href = '/chat';
     }
   });
 }
 
 if (googleBtn) {
-  googleBtn.addEventListener('click', () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then(() => window.location.href = '/chat')
-      .catch(err => alert(err.message));
+  googleBtn.addEventListener('click', async () => {
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+    if (error) alert(error.message);
   });
 }
 
 if (githubBtn) {
-  githubBtn.addEventListener('click', () => {
-    const provider = new GithubAuthProvider();
-    signInWithPopup(auth, provider)
-      .then(() => window.location.href = '/chat')
-      .catch(err => alert(err.message));
+  githubBtn.addEventListener('click', async () => {
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'github' });
+    if (error) alert(error.message);
   });
 }
 
 // Global state for user
-onAuthStateChanged(auth, (user) => {
+supabase.auth.onAuthStateChange((event, session) => {
+  const user = session?.user;
   const userNameEl = document.getElementById('user-name');
   const path = window.location.pathname;
+
   if (user) {
-    if (userNameEl) userNameEl.textContent = user.displayName || user.email;
+    if (userNameEl) userNameEl.textContent = user.user_metadata?.full_name || user.email;
     if (path === '/login' || path === '/login.html') window.location.href = '/chat';
   } else {
     if (path === '/chat' || path === '/chat.html') window.location.href = '/login';
@@ -93,8 +93,9 @@ onAuthStateChanged(auth, (user) => {
 
 const logoutBtn = document.getElementById('logout-btn');
 if (logoutBtn) {
-  logoutBtn.addEventListener('click', () => {
-    signOut(auth).then(() => window.location.href = '/login');
+  logoutBtn.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/login';
   });
 }
 
@@ -106,11 +107,12 @@ const messageInput = document.getElementById('message-input');
 if (chatForm && chatMessages) {
   // Listen for messages
   const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
-  onSnapshot(q, (snapshot) => {
+  onSnapshot(q, async (snapshot) => {
+    const { data: { user } } = await supabase.auth.getUser();
     snapshot.docChanges().forEach((change) => {
       if (change.type === "added") {
         const data = change.doc.data();
-        const isMe = data.uid === auth.currentUser?.uid;
+        const isMe = data.uid === user?.id;
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${isMe ? 'sent' : 'received'}`;
 
@@ -131,12 +133,14 @@ if (chatForm && chatMessages) {
     e.preventDefault();
     if (!messageInput.value.trim()) return;
 
-    const { uid, displayName, photoURL } = auth.currentUser;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return alert('Please login to send messages');
+
     await addDoc(collection(db, "messages"), {
       text: messageInput.value,
-      uid,
-      displayName,
-      photoURL,
+      uid: user.id,
+      displayName: user.user_metadata?.full_name || user.email,
+      photoURL: user.user_metadata?.avatar_url || '',
       createdAt: serverTimestamp()
     });
 
