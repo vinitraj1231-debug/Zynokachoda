@@ -1,24 +1,9 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Supabase configuration
-const supabaseUrl = 'YOUR_SUPABASE_URL';
-const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+const supabaseUrl = 'https://jrjzkpxlpiovhwithxbo.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpyanprcHhscGlvdmh3aXRoeGJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNDUzNDQsImV4cCI6MjA4NDgyMTM0NH0.aRbGjlOVUrRK5Ji-P1W-LJ6HUVYuJeU2pixABEWCYYY';
 const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Firebase configuration (Keep for Firestore until fully migrated)
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-
-const firebaseApp = initializeApp(firebaseConfig);
-const db = getFirestore(firebaseApp);
 
 // Auth Logic
 const loginForm = document.getElementById('login-form');
@@ -45,6 +30,8 @@ if (toggleAuth) {
   });
 }
 
+const ADMIN_EMAIL = 'Kvinit6421@gmail.com';
+
 if (loginForm) {
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -52,13 +39,19 @@ if (loginForm) {
     const password = document.getElementById('password').value;
 
     if (isSignUp) {
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) alert(error.message);
-      else window.location.href = '/chat';
+      else {
+        if (data.user?.email === ADMIN_EMAIL) window.location.href = '/admin';
+        else window.location.href = '/chat';
+      }
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) alert(error.message);
-      else window.location.href = '/chat';
+      else {
+        if (data.user?.email === ADMIN_EMAIL) window.location.href = '/admin';
+        else window.location.href = '/chat';
+      }
     }
   });
 }
@@ -85,9 +78,21 @@ supabase.auth.onAuthStateChange((event, session) => {
 
   if (user) {
     if (userNameEl) userNameEl.textContent = user.user_metadata?.full_name || user.email;
-    if (path === '/login' || path === '/login.html') window.location.href = '/chat';
+
+    // Admin redirection
+    if (user.email === ADMIN_EMAIL) {
+      if (path === '/login' || path === '/login.html' || path === '/chat' || path === '/chat.html') {
+        window.location.href = '/admin';
+      }
+    } else {
+      if (path === '/login' || path === '/login.html' || path === '/admin' || path === '/admin.html') {
+        window.location.href = '/chat';
+      }
+    }
   } else {
-    if (path === '/chat' || path === '/chat.html') window.location.href = '/login';
+    if (path === '/chat' || path === '/chat.html' || path === '/admin' || path === '/admin.html') {
+      window.location.href = '/login';
+    }
   }
 });
 
@@ -99,51 +104,149 @@ if (logoutBtn) {
   });
 }
 
+// Admin Panel Logic
+const adminMessagesBody = document.getElementById('admin-messages-body');
+
+if (adminMessagesBody) {
+  const loadAdminMessages = async () => {
+    const { data: messages, error } = await supabase
+      .from('messages')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) console.error('Error loading admin messages:', error);
+    else {
+      adminMessagesBody.innerHTML = '';
+      messages.forEach(msg => {
+        const tr = document.createElement('tr');
+
+        const tdUser = document.createElement('td');
+        const userNameDiv = document.createElement('div');
+        userNameDiv.style.fontWeight = '600';
+        userNameDiv.textContent = msg.display_name;
+        const uidDiv = document.createElement('div');
+        uidDiv.style.fontSize = '11px';
+        uidDiv.style.color = 'var(--text-3)';
+        uidDiv.textContent = msg.uid;
+        tdUser.appendChild(userNameDiv);
+        tdUser.appendChild(uidDiv);
+
+        const tdText = document.createElement('td');
+        tdText.textContent = msg.text;
+
+        const tdTime = document.createElement('td');
+        tdTime.style.color = 'var(--text-3)';
+        tdTime.style.fontSize = '12px';
+        tdTime.textContent = new Date(msg.created_at).toLocaleString();
+
+        const tdActions = document.createElement('td');
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-delete';
+        delBtn.textContent = 'Delete';
+        delBtn.setAttribute('data-id', msg.id);
+        tdActions.appendChild(delBtn);
+
+        tr.appendChild(tdUser);
+        tr.appendChild(tdText);
+        tr.appendChild(tdTime);
+        tr.appendChild(tdActions);
+
+        adminMessagesBody.appendChild(tr);
+      });
+
+      document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = e.target.getAttribute('data-id');
+          if (confirm('Are you sure you want to delete this message?')) {
+            const { error } = await supabase.from('messages').delete().eq('id', id);
+            if (error) alert('Error deleting message: ' + error.message);
+            else loadAdminMessages();
+          }
+        });
+      });
+    }
+  };
+
+  loadAdminMessages();
+}
+
 // Chat Logic
 const chatForm = document.getElementById('chat-form');
 const chatMessages = document.getElementById('chat-messages');
 const messageInput = document.getElementById('message-input');
 
 if (chatForm && chatMessages) {
-  // Listen for messages
-  const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
-  onSnapshot(q, async (snapshot) => {
+  const renderMessage = (data, user, prepend = false) => {
+    const isMe = data.uid === user?.id;
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${isMe ? 'sent' : 'received'}`;
+
+    const textNode = document.createTextNode(data.text);
+    msgDiv.appendChild(textNode);
+
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'message-time';
+    const date = data.created_at ? new Date(data.created_at) : new Date();
+    timeSpan.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    msgDiv.appendChild(timeSpan);
+
+    if (prepend) {
+      chatMessages.prepend(msgDiv);
+    } else {
+      chatMessages.appendChild(msgDiv);
+    }
+  };
+
+  // Initial Load
+  const loadMessages = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    snapshot.docChanges().forEach((change) => {
-      if (change.type === "added") {
-        const data = change.doc.data();
-        const isMe = data.uid === user?.id;
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `message ${isMe ? 'sent' : 'received'}`;
+    const { data: messages, error } = await supabase
+      .from('messages')
+      .select('*')
+      .order('created_at', { ascending: true });
 
-        const textNode = document.createTextNode(data.text);
-        msgDiv.appendChild(textNode);
+    if (error) console.error('Error loading messages:', error);
+    else {
+      chatMessages.innerHTML = '';
+      messages.forEach(msg => renderMessage(msg, user));
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  };
 
-        const timeSpan = document.createElement('span');
-        timeSpan.className = 'message-time';
-        timeSpan.textContent = data.createdAt?.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) || 'Just now';
-        msgDiv.appendChild(timeSpan);
-        chatMessages.appendChild(msgDiv);
-      }
-    });
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  });
+  loadMessages();
+
+  // Listen for real-time updates
+  supabase
+    .channel('public:messages')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      renderMessage(payload.new, user);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    })
+    .subscribe();
 
   chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!messageInput.value.trim()) return;
+    const text = messageInput.value.trim();
+    if (!text) return;
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return alert('Please login to send messages');
 
-    await addDoc(collection(db, "messages"), {
-      text: messageInput.value,
-      uid: user.id,
-      displayName: user.user_metadata?.full_name || user.email,
-      photoURL: user.user_metadata?.avatar_url || '',
-      createdAt: serverTimestamp()
-    });
+    const { error } = await supabase.from('messages').insert([
+      {
+        text: text,
+        uid: user.id,
+        display_name: user.user_metadata?.full_name || user.email,
+        photo_url: user.user_metadata?.avatar_url || '',
+      }
+    ]);
 
-    messageInput.value = '';
+    if (error) {
+      console.error('Error sending message:', error);
+      alert('Error sending message: ' + error.message);
+    } else {
+      messageInput.value = '';
+    }
   });
 }
