@@ -172,7 +172,9 @@
     }
     .message.received {
       align-self: flex-start;
-      background: var(--bg-2);
+      background: rgba(0, 0, 0, 0.05);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-bottom-left-radius: 4px;
     }
     .message.sent {
@@ -180,6 +182,7 @@
       background: var(--accent-v);
       color: #fff;
       border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     }
     .message-time {
       font-size: 10px;

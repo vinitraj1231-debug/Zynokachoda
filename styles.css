@@ -505,8 +505,8 @@ ul { list-style: none; }
   box-shadow: none;
 }
 .btn-primary:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  transform: translateY(-2px);
 }
 
 .btn-icon-only {
