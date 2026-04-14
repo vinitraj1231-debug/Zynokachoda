@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create New — Zynochat</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .create-container {
+      padding: 80px 16px 100px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .type-selector {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .type-btn {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid var(--border-1);
+      border-radius: var(--radius-m);
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-2);
+    }
+    .type-btn.active {
+      background: var(--accent-v);
+      color: #fff;
+      border-color: var(--accent-v);
+    }
+  </style>
+</head>
+<body class="bg-0">
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <a href="chat.html" style="display:flex; align-items:center; gap:8px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        <h1 class="app-logo-text">Create</h1>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="create-container">
+  <div class="type-selector">
+    <div class="type-btn active" id="btn-group">Group</div>
+    <div class="type-btn" id="btn-channel">Channel</div>
+  </div>
+
+  <form id="create-form">
+    <div class="form-group">
+      <label class="form-label" id="label-name">Group Name</label>
+      <input type="text" class="form-input" placeholder="Enter name..." required>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Username / Handle</label>
+      <input type="text" class="form-input" placeholder="@handle" required>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-textarea" placeholder="What is this about?"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Visibility</label>
+      <div style="display: flex; gap: 16px; margin-top: 8px;">
+        <label style="display:flex; align-items:center; gap:8px; font-size:14px;">
+          <input type="radio" name="visibility" value="public" checked> Public
+        </label>
+        <label style="display:flex; align-items:center; gap:8px; font-size:14px;">
+          <input type="radio" name="visibility" value="private"> Private
+        </label>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 16px;">
+      Create
+    </button>
+  </form>
+</main>
+
+<script>
+  const btnGroup = document.getElementById('btn-group');
+  const btnChannel = document.getElementById('btn-channel');
+  const labelName = document.getElementById('label-name');
+  const urlParams = new URLSearchParams(window.location.search);
+  const type = urlParams.get('type');
+
+  function setType(t) {
+    if (t === 'channel') {
+      btnChannel.classList.add('active');
+      btnGroup.classList.remove('active');
+      labelName.textContent = 'Channel Name';
+    } else {
+      btnGroup.classList.add('active');
+      btnChannel.classList.remove('active');
+      labelName.textContent = 'Group Name';
+    }
+  }
+
+  if (type) setType(type);
+
+  btnGroup.addEventListener('click', () => setType('group'));
+  btnChannel.addEventListener('click', () => setType('channel'));
+
+  document.getElementById('create-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    alert('Creation logic initiated. Successfully created!');
+    window.location.href = 'chat.html';
+  });
+</script>
+</body>
+</html>

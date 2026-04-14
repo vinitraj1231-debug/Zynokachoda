@@ -92,74 +92,53 @@
 
 <body>
 
-<!-- ── Navigation ──────────────────────────────────────────── -->
-<nav class="nav" role="navigation" aria-label="Main navigation">
-  <div class="container">
-    <div class="nav-inner">
-      <a href="index.html" class="nav-logo" aria-label="Zynochat home">
-        <div class="logo-icon" aria-hidden="true">
-          <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2C5.58 2 2 5.58 2 10c0 1.85.6 3.56 1.6 4.95L2.05 17.5a.5.5 0 00.63.63l2.55-1.55A7.96 7.96 0 0010 18c4.42 0 8-3.58 8-8s-3.58-8-8-8zm-3 6h6a.5.5 0 010 1H7a.5.5 0 010-1zm0 2.5h4a.5.5 0 010 1H7a.5.5 0 010-1z"/></svg>
-        </div>
-        Zynochat
+<!-- ── Header ──────────────────────────────────────────── -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <h1 class="app-logo-text">Zyno</h1>
+    </div>
+    <div class="header-right">
+      <a href="profile.html" class="profile-box-link" style="display: block;">
+        <div class="profile-box"></div>
       </a>
-
-      <div class="nav-links" role="list">
-        <a href="index.html" role="listitem">Home</a>
-        <a href="features.html" role="listitem">Features</a>
-        <a href="compare.html" role="listitem">Compare</a>
-        <a href="blog.html" role="listitem">Blog</a>
-        <a href="about.html" role="listitem">About</a>
-        <a href="contact.html" role="listitem">Contact</a>
-      </div>
-
-      <a href="login.html" class="btn-nav">Get Started</a>
-
-      <button class="nav-hamburger" aria-label="Toggle mobile menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
     </div>
   </div>
-</nav>
+</header>
 
-<!-- Mobile drawer -->
-<div class="nav-drawer" role="dialog" aria-label="Mobile navigation">
-  <a href="index.html">Home</a>
-  <a href="features.html">Features</a>
-  <a href="compare.html">Compare</a>
-  <a href="blog.html">Blog</a>
-  <a href="about.html">About</a>
-  <a href="contact.html">Contact</a>
-  <a href="login.html" class="btn-nav">Get Started →</a>
-</div>
-
-<!-- ── Hero ────────────────────────────────────────────────── -->
-<section class="hero" aria-labelledby="hero-heading">
-
-  <div class="container">
-    <div class="hero-content">
-      <div class="hero-badge fade-up">
-        <span class="hero-badge-dot" aria-hidden="true"></span>
-        Now available — Zynochat v2.0
-      </div>
-
-      <h1 class="hero-title fade-up delay-1" id="hero-heading">
-        The Chat Platform<br />
-        Built for <span class="grad-text">Real Communities</span>
-      </h1>
-
-      <p class="hero-sub fade-up delay-2">
-        Zynochat delivers blazing-fast messaging, end-to-end privacy, and powerful community tools in one elegant platform. No clutter. No compromise.
-      </p>
-
-      <div class="hero-ctas fade-up delay-3">
-        <a href="login.html" class="btn btn-primary btn-lg">
-          Get Started Now <span class="btn-arrow" aria-hidden="true">→</span>
-        </a>
-        <a href="about.html" class="btn btn-secondary btn-lg">
-          Learn More
-        </a>
-      </div>
+<!-- ── Banner ──────────────────────────────────────────────── -->
+<section class="banner-section">
+  <div class="banner-container">
+    <div class="ad-banner">
+      <!-- Admin configurable banner area -->
+      <span class="banner-placeholder">Your Ad/Banner Here</span>
     </div>
+  </div>
+</section>
+
+<!-- ── Shortcuts ───────────────────────────────────────────── -->
+<section class="shortcuts-section">
+  <div class="shortcuts-container">
+    <a href="help.html" class="shortcut-item">
+      <span class="shortcut-icon">#</span>
+      <span class="shortcut-label">help</span>
+    </a>
+    <a href="chat.html?type=support" class="shortcut-item">
+      <span class="shortcut-icon">#</span>
+      <span class="shortcut-label">support chat</span>
+    </a>
+    <a href="ai-chat.html" class="shortcut-item">
+      <span class="shortcut-icon">#</span>
+      <span class="shortcut-label">ai</span>
+    </a>
+    <a href="channel.html?id=official" class="shortcut-item">
+      <span class="shortcut-icon">#</span>
+      <span class="shortcut-label">update channel</span>
+    </a>
+    <a href="report.html" class="shortcut-item">
+      <span class="shortcut-icon">#</span>
+      <span class="shortcut-label">report</span>
+    </a>
   </div>
 </section>
 
@@ -223,9 +202,9 @@
       <div class="card fade-up delay-2">
         <div class="card-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="stroke: var(--accent-v);">
-            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
             <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 10 7.75"/>
           </svg>
         </div>
         <h3 class="card-title">Communities</h3>
@@ -522,8 +501,32 @@
   </div>
 </section>
 
+<!-- ── Bottom Navigation ────────────────────────────────────── -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Home</span>
+  </a>
+  <a href="chat.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>Chats</span>
+  </a>
+  <a href="ai-chat.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    <span>AI</span>
+  </a>
+  <a href="profile.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Profile</span>
+  </a>
+  <a href="settings.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>Settings</span>
+  </a>
+</nav>
+
 <!-- ── Footer ───────────────────────────────────────────────── -->
-<footer class="footer" role="contentinfo">
+<footer class="footer" role="contentinfo" style="margin-bottom: 80px;">
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
