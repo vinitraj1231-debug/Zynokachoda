@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search — Zynochat</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .search-page-header {
+      padding: 16px;
+      background: var(--bg-0);
+      position: sticky;
+      top: 60px;
+      z-index: 100;
+      border-bottom: 1px solid var(--border-1);
+    }
+    .results-container {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .result-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .result-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-3);
+      letter-spacing: 0.05em;
+    }
+    .result-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg-1);
+      border: 1px solid var(--border-1);
+      border-radius: var(--radius-m);
+    }
+    .result-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--bg-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    .result-info {
+      flex: 1;
+    }
+    .result-name {
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .result-handle {
+      font-size: 13px;
+      color: var(--text-3);
+    }
+    .priority-badge {
+      font-size: 10px;
+      background: var(--accent-v);
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body class="bg-0">
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <h1 class="app-logo-text">Search</h1>
+    </div>
+  </div>
+</header>
+
+<div class="search-page-header">
+  <div class="search-wrap">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="global-search" class="search-input" placeholder="Search channels, groups, bots...">
+  </div>
+</div>
+
+<main class="results-container" id="search-results">
+  <div class="result-section">
+    <h3 class="result-section-title">Channels</h3>
+    <div id="channel-results">
+      <div class="result-card">
+        <div class="result-avatar" style="background: var(--grad-brand); color:#fff">Z</div>
+        <div class="result-info">
+          <div class="result-name">Zynochat Official<span class="priority-badge">Verified</span></div>
+          <div class="result-handle">@zynochat</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-section">
+    <h3 class="result-section-title">Groups</h3>
+    <div id="group-results">
+      <div class="result-card">
+        <div class="result-avatar">G</div>
+        <div class="result-info">
+          <div class="result-name">Global Lounge</div>
+          <div class="result-handle">@global_chat</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-section">
+    <h3 class="result-section-title">Bots</h3>
+    <div id="bot-results">
+      <div class="result-card">
+        <div class="result-avatar">AI</div>
+        <div class="result-info">
+          <div class="result-name">Zyno Assistant</div>
+          <div class="result-handle">@zyno_bot</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Home</span>
+  </a>
+  <a href="chat.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>Chats</span>
+  </a>
+  <a href="search.html" class="nav-item active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <span>Search</span>
+  </a>
+  <a href="profile.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Profile</span>
+  </a>
+  <a href="settings.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>Settings</span>
+  </a>
+</nav>
+
+<script src="app.js" type="module"></script>
+</body>
+</html>

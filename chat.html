@@ -31,8 +31,46 @@
       z-index: 10;
     }
     .sidebar-header {
-      padding: 16px;
+      padding: 16px 16px 0;
       border-bottom: 1px solid var(--border-1);
+    }
+    .chat-tabs {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-1);
+      scrollbar-width: none;
+    }
+    .chat-tabs::-webkit-scrollbar { display: none; }
+    .chat-tab {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-3);
+      white-space: nowrap;
+      padding-bottom: 8px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .chat-tab.active {
+      color: var(--accent-v);
+      border-color: var(--accent-v);
+    }
+    .btn-create-floating {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--grad-brand);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      cursor: pointer;
+      z-index: 20;
     }
     .search-wrap {
       background: var(--bg-2);
@@ -207,15 +245,10 @@
 </head>
 <body>
 
-<nav class="nav scrolled">
+<nav class="nav scrolled" id="chat-nav">
   <div class="container">
     <div class="nav-inner">
-      <a href="index.html" class="nav-logo">
-        <div class="logo-icon">
-          <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2C5.58 2 2 5.58 2 10c0 1.85.6 3.56 1.6 4.95L2.05 17.5a.5.5 0 00.63.63l2.55-1.55A7.96 7.96 0 0010 18c4.42 0 8-3.58 8-8s-3.58-8-8-8zm-3 6h6a.5.5 0 010 1H7a.5.5 0 010-1zm0 2.5h4a.5.5 0 010 1H7a.5.5 0 010-1z"/></svg>
-        </div>
-        Zynochat
-      </a>
+      <h1 class="app-logo-text" style="font-size: 20px;">Zyno</h1>
       <div id="user-profile" style="display: flex; align-items: center; gap: 12px;">
         <span id="user-name" class="contact-name" style="margin-bottom:0">Loading...</span>
         <button id="logout-btn" class="btn btn-sm btn-ghost">Logout</button>
@@ -226,11 +259,19 @@
 
 <div class="chat-container">
   <aside class="chat-sidebar" id="sidebar">
-    <div class="sidebar-header">
+    <div class="sidebar-header" style="border-bottom:none;">
       <div class="search-wrap">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" class="search-input" placeholder="Search messages...">
+        <input type="text" class="search-input" placeholder="Search chats...">
       </div>
+    </div>
+    <div class="chat-tabs">
+      <div class="chat-tab active">All</div>
+      <div class="chat-tab">Personal</div>
+      <div class="chat-tab">Groups</div>
+      <div class="chat-tab">Channels</div>
+      <div class="chat-tab">Bots</div>
+      <div class="chat-tab" style="font-size: 18px;">+</div>
     </div>
     <div class="contact-list" id="contact-list">
       <!-- Contacts will be populated here -->
@@ -247,13 +288,19 @@
   <main class="chat-main">
     <header class="chat-header">
       <div style="display: flex; align-items: center; gap: 12px;">
+        <button id="sidebar-toggle-mobile" class="btn-icon-only" style="display:none;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
         <div class="contact-avatar" style="width: 40px; height: 40px;">G</div>
-        <div>
+        <div style="cursor: pointer;" onclick="location.href='profile.html'">
           <div class="contact-name" style="margin-bottom:0">Global Lounge</div>
           <div style="font-size: 12px; color: #4ade80;">Online</div>
         </div>
       </div>
-      <button class="btn btn-sm btn-secondary" id="sidebar-toggle" style="display: none;">Menu</button>
+      <div style="display: flex; gap: 12px;">
+        <button class="btn-icon-only"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
+        <button class="btn-icon-only"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+      </div>
     </header>
 
     <div class="chat-messages" id="chat-messages">
@@ -272,8 +319,50 @@
         </button>
       </form>
     </div>
+    <div class="btn-create-floating" id="open-creator">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+
+    <!-- Creator Menu -->
+    <div id="creator-menu" class="creator-menu">
+      <div class="creator-option" onclick="location.href='create.html?type=group'">
+        <span>New Group</span>
+      </div>
+      <div class="creator-option" onclick="location.href='create.html?type=channel'">
+        <span>New Channel</span>
+      </div>
+      <div class="creator-option">
+        <span>New Bot</span>
+      </div>
+      <div class="creator-option">
+        <span>New Story</span>
+      </div>
+    </div>
   </main>
 </div>
+
+<nav class="bottom-nav" id="main-bottom-nav">
+  <a href="index.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Home</span>
+  </a>
+  <a href="chat.html" class="nav-item active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>Chats</span>
+  </a>
+  <a href="search.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <span>Search</span>
+  </a>
+  <a href="profile.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Profile</span>
+  </a>
+  <a href="settings.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>Settings</span>
+  </a>
+</nav>
 
 <script src="script.js"></script>
 <script src="app.js" type="module"></script>

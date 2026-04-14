@@ -37,6 +37,9 @@
   --radius-l:      22px;
   --radius-xl:     32px;
 
+  --shadow-sm:     0 2px 4px rgba(0,0,0,0.05);
+  --shadow-md:     0 4px 12px rgba(0,0,0,0.08);
+
   --ease:          cubic-bezier(0.4, 0, 0.2, 1);
   --t-fast:        0.18s var(--ease);
   --t-med:         0.3s  var(--ease);
@@ -472,6 +475,58 @@ ul { list-style: none; }
 .btn-primary:hover {
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   transform: translateY(-1px);
+}
+
+.btn-icon-only {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--t-fast);
+}
+
+.btn-icon-only:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-1);
+}
+
+/* ── Creator Menu ────────────────────────────────────────── */
+.creator-menu {
+  position: absolute;
+  bottom: 90px;
+  right: 24px;
+  width: 180px;
+  background: var(--bg-0);
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-md);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.creator-menu.active { display: flex; }
+
+.creator-option {
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-1);
+  transition: background var(--t-fast);
+}
+
+.creator-option:last-child { border-bottom: none; }
+.creator-option:hover {
+  background: var(--bg-2);
+  color: var(--text-1);
 }
 
 .btn-secondary {

@@ -84,20 +84,33 @@ supabase.auth.onAuthStateChange((event, session) => {
   const path = window.location.pathname;
 
   if (user) {
-    if (userNameEl) userNameEl.textContent = user.user_metadata?.full_name || user.email;
+    const name = user.user_metadata?.full_name || user.email;
+    if (userNameEl) userNameEl.textContent = name;
+
+    // Profile page updates
+    const pName = document.getElementById('profile-name');
+    const pHandle = document.getElementById('profile-handle');
+    const pDP = document.getElementById('user-dp');
+    if (pName) pName.textContent = name;
+    if (pHandle) pHandle.textContent = `@${user.email.split('@')[0]}`;
+    if (pDP) pDP.textContent = name.charAt(0).toUpperCase();
+
     if (path === '/login' || path === '/login.html') window.location.href = '/chat';
   } else {
-    if (path === '/chat' || path === '/chat.html') window.location.href = '/login';
+    if (path === '/chat' || path === '/chat.html' || path === '/profile.html' || path === '/settings.html') window.location.href = '/login';
   }
 });
 
 const logoutBtn = document.getElementById('logout-btn');
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/login';
-  });
+const logoutBtnSettings = document.getElementById('logout-btn-settings');
+
+async function handleLogout() {
+  await supabase.auth.signOut();
+  window.location.href = '/login';
 }
+
+if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+if (logoutBtnSettings) logoutBtnSettings.addEventListener('click', handleLogout);
 
 // Chat Logic
 const chatForm = document.getElementById('chat-form');
@@ -145,5 +158,145 @@ if (chatForm && chatMessages) {
     });
 
     messageInput.value = '';
+  });
+
+  // Hide bottom nav when chat is active (mobile)
+  const mainBottomNav = document.getElementById('main-bottom-nav');
+  const chatNav = document.getElementById('chat-nav');
+
+  function hideNavs() {
+    if (window.innerWidth <= 768) {
+      if (mainBottomNav) mainBottomNav.style.display = 'none';
+      if (chatNav) chatNav.style.display = 'none';
+    }
+  }
+
+  // Toggle between contacts and chat view on mobile
+  const contactItems = document.querySelectorAll('.contact-item');
+  const sidebar = document.getElementById('sidebar');
+  contactItems.forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        if (sidebar) sidebar.classList.remove('open');
+        hideNavs();
+      }
+    });
+  });
+
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const sidebarToggleMobile = document.getElementById('sidebar-toggle-mobile');
+
+  function showSidebar() {
+    if (sidebar) sidebar.classList.add('open');
+    if (mainBottomNav) mainBottomNav.style.display = 'flex';
+    if (chatNav) chatNav.style.display = 'flex';
+    if (sidebarToggleMobile) sidebarToggleMobile.style.display = 'none';
+  }
+
+  if (sidebarToggle) sidebarToggle.addEventListener('click', showSidebar);
+  if (sidebarToggleMobile) sidebarToggleMobile.addEventListener('click', showSidebar);
+
+  // Creator Menu Toggle
+  const openCreatorBtn = document.getElementById('open-creator');
+  const creatorMenu = document.getElementById('creator-menu');
+  if (openCreatorBtn && creatorMenu) {
+    openCreatorBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      creatorMenu.classList.toggle('active');
+    });
+    document.addEventListener('click', () => {
+      creatorMenu.classList.remove('active');
+    });
+  }
+}
+
+// Help Form Logic
+const helpForm = document.getElementById('help-form');
+if (helpForm) {
+  helpForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('ticket-title').value;
+    const category = document.getElementById('ticket-category').value;
+    const desc = document.getElementById('ticket-desc').value;
+    const statusEl = document.getElementById('help-status');
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Simulate sending to Telegram Bot and saving to DB
+    const ticketData = {
+      title,
+      category,
+      description: desc,
+      userId: user?.id || 'anonymous',
+      userEmail: user?.email || 'anonymous',
+      createdAt: new Date().toISOString()
+    };
+
+    console.log('Ticket Submitted:', ticketData);
+
+    if (statusEl) {
+      statusEl.textContent = '✓ Ticket submitted successfully! It has been sent to our Telegram support.';
+      statusEl.style.color = '#000';
+      statusEl.style.display = 'block';
+    }
+
+    helpForm.reset();
+  });
+}
+
+// Report Form Logic
+const reportForm = document.getElementById('report-form');
+if (reportForm) {
+  reportForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const handle = document.getElementById('report-handle').value;
+    const reason = document.getElementById('report-reason').value;
+    const statusEl = document.getElementById('report-status');
+
+    console.log('Report Submitted:', { handle, reason });
+
+    if (statusEl) {
+      statusEl.textContent = '✓ Report submitted. Our team will review it shortly.';
+      statusEl.style.color = '#ff4444';
+      statusEl.style.display = 'block';
+    }
+
+    reportForm.reset();
+  });
+}
+
+// AI Assistant Logic (Simulation)
+const aiForm = document.getElementById('ai-form');
+const aiMessages = document.getElementById('ai-messages');
+const aiInput = document.getElementById('ai-input');
+const aiTyping = document.getElementById('ai-typing');
+
+if (aiForm && aiMessages) {
+  aiForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = aiInput.value.trim();
+    if (!text) return;
+
+    // Add user message
+    const userMsg = document.createElement('div');
+    userMsg.className = 'ai-bubble user';
+    userMsg.textContent = text;
+    aiMessages.appendChild(userMsg);
+    aiInput.value = '';
+    aiMessages.scrollTop = aiMessages.scrollHeight;
+
+    // Show typing indicator
+    if (aiTyping) aiTyping.style.display = 'block';
+
+    // Simulate OpenRouter API call
+    setTimeout(() => {
+      if (aiTyping) aiTyping.style.display = 'none';
+
+      const botMsg = document.createElement('div');
+      botMsg.className = 'ai-bubble bot';
+      botMsg.textContent = `As your Zyno AI, I've processed your request: "${text}". Currently, I'm in simulation mode. In production, I will connect via OpenRouter API.`;
+      aiMessages.appendChild(botMsg);
+      aiMessages.scrollTop = aiMessages.scrollHeight;
+    }, 1500);
   });
 }
