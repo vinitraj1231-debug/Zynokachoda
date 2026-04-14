@@ -22,10 +22,12 @@ const db = getFirestore(firebaseApp);
 
 // Auth Logic
 const loginForm = document.getElementById('login-form');
+const otpForm = document.getElementById('otp-form');
 const toggleAuth = document.getElementById('toggle-auth');
 const googleBtn = document.getElementById('google-login');
 const githubBtn = document.getElementById('github-login');
 let isSignUp = false;
+let userEmail = '';
 
 if (toggleAuth) {
   toggleAuth.addEventListener('click', (e) => {
@@ -50,15 +52,50 @@ if (loginForm) {
     e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+    userEmail = email;
 
     if (isSignUp) {
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) alert(error.message);
-      else window.location.href = '/chat';
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: email.split('@')[0], // Default name
+          }
+        }
+      });
+      if (error) {
+        alert(error.message);
+      } else {
+        // Switch to OTP form
+        loginForm.style.display = 'none';
+        if (otpForm) otpForm.style.display = 'block';
+        const toggleContainer = document.getElementById('toggle-auth-container');
+        if (toggleContainer) toggleContainer.style.display = 'none';
+      }
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) alert(error.message);
-      else window.location.href = '/chat';
+      else window.location.href = '/index.html';
+    }
+  });
+}
+
+if (otpForm) {
+  otpForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const token = document.getElementById('otp-input').value;
+
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: userEmail,
+      token: token,
+      type: 'signup'
+    });
+
+    if (error) {
+      alert(error.message);
+    } else {
+      window.location.href = '/index.html';
     }
   });
 }
@@ -95,9 +132,9 @@ supabase.auth.onAuthStateChange((event, session) => {
     if (pHandle) pHandle.textContent = `@${user.email.split('@')[0]}`;
     if (pDP) pDP.textContent = name.charAt(0).toUpperCase();
 
-    if (path === '/login' || path === '/login.html') window.location.href = '/chat';
+    if (path === '/login' || path === '/login.html') window.location.href = '/index.html';
   } else {
-    if (path === '/chat' || path === '/chat.html' || path === '/profile.html' || path === '/settings.html') window.location.href = '/login';
+    if (path === '/chat' || path === '/chat.html' || path === '/profile.html' || path === '/settings.html' || path === '/index.html') window.location.href = '/login.html';
   }
 });
 
@@ -134,7 +171,14 @@ if (chatForm && chatMessages) {
 
         const timeSpan = document.createElement('span');
         timeSpan.className = 'message-time';
-        timeSpan.textContent = data.createdAt?.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) || 'Just now';
+        const timeText = data.createdAt?.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) || 'Just now';
+
+        if (isMe) {
+          timeSpan.innerHTML = `${timeText} <span class="ticks">✓✓</span>`;
+        } else {
+          timeSpan.textContent = timeText;
+        }
+
         msgDiv.appendChild(timeSpan);
         chatMessages.appendChild(msgDiv);
       }
@@ -263,6 +307,102 @@ if (reportForm) {
 
     reportForm.reset();
   });
+}
+
+// Username Search and Personal Chat Logic
+const userSearchInput = document.getElementById('user-search-input');
+const searchOverlay = document.getElementById('search-results-overlay');
+const contactList = document.getElementById('contact-list');
+
+if (userSearchInput && searchOverlay) {
+  userSearchInput.addEventListener('input', async (e) => {
+    const queryStr = e.target.value.trim().toLowerCase();
+    if (queryStr.length < 3) {
+      searchOverlay.style.display = 'none';
+      return;
+    }
+
+    // Simulation of searching users in Supabase profiles
+    const users = [
+      { id: '1', username: 'vinit_raj', full_name: 'Vinit Raj' },
+      { id: '2', username: 'jules_ai', full_name: 'Jules AI' },
+      { id: '3', username: 'alex_chat', full_name: 'Alex' },
+    ].filter(u => u.username.includes(queryStr.replace('@', '')));
+
+    searchOverlay.innerHTML = '';
+    if (users.length > 0) {
+      users.forEach(u => {
+        const div = document.createElement('div');
+        div.className = 'search-result-item';
+        div.innerHTML = `
+          <div class="contact-avatar">${u.full_name.charAt(0)}</div>
+          <div class="contact-info">
+            <div class="contact-name">${u.full_name}</div>
+            <div class="contact-last-msg">@${u.username}</div>
+          </div>
+        `;
+        div.onclick = () => {
+          startPersonalChat(u);
+          searchOverlay.style.display = 'none';
+          userSearchInput.value = '';
+        };
+        searchOverlay.appendChild(div);
+      });
+      searchOverlay.style.display = 'block';
+    } else {
+      searchOverlay.style.display = 'none';
+    }
+  });
+}
+
+function startPersonalChat(user) {
+  if (!contactList) return;
+
+  // Check if contact already exists
+  const existing = Array.from(contactList.querySelectorAll('.contact-name'))
+    .find(el => el.textContent === user.full_name);
+
+  if (existing) {
+    existing.closest('.contact-item').click();
+    return;
+  }
+
+  // Add new contact item
+  const contactItem = document.createElement('div');
+  contactItem.className = 'contact-item';
+  contactItem.innerHTML = `
+    <div class="contact-avatar">${user.full_name.charAt(0)}</div>
+    <div class="contact-info">
+      <div class="contact-name">${user.full_name}</div>
+      <div class="contact-last-msg">Start chatting with @${user.username}</div>
+    </div>
+  `;
+
+  contactItem.onclick = () => {
+    document.querySelectorAll('.contact-item').forEach(i => i.classList.remove('active'));
+    contactItem.classList.add('active');
+
+    const chatTitle = document.querySelector('.chat-main .contact-name');
+    if (chatTitle) chatTitle.textContent = user.full_name;
+
+    const chatMessages = document.getElementById('chat-messages');
+    if (chatMessages) {
+      chatMessages.innerHTML = `
+        <div class="message received">
+          Hi! This is the start of your personal chat with ${user.full_name}.
+          <span class="message-time">Just now</span>
+        </div>
+      `;
+    }
+
+    if (window.innerWidth <= 768) {
+      document.getElementById('sidebar').classList.remove('open');
+      hideNavs();
+    }
+  };
+
+  contactList.prepend(contactItem);
+  contactItem.click();
 }
 
 // AI Assistant Logic (Simulation)

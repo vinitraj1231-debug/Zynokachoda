@@ -185,8 +185,26 @@
       font-size: 10px;
       opacity: 0.6;
       margin-top: 4px;
-      display: block;
-      text-align: right;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      display: inline-block;
+      margin-right: 4px;
+    }
+    .status-text {
+      font-size: 12px;
+      color: #4ade80;
+    }
+    .ticks {
+      color: #34b7f1;
+      font-weight: 700;
     }
 
     .chat-input-area {
@@ -262,7 +280,10 @@
     <div class="sidebar-header" style="border-bottom:none;">
       <div class="search-wrap">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" class="search-input" placeholder="Search chats...">
+        <input type="text" id="user-search-input" class="search-input" placeholder="Search by @username...">
+      </div>
+      <div id="search-results-overlay" class="search-overlay" style="display: none;">
+        <!-- Dynamic search results will appear here -->
       </div>
     </div>
     <div class="chat-tabs">
@@ -294,7 +315,7 @@
         <div class="contact-avatar" style="width: 40px; height: 40px;">G</div>
         <div style="cursor: pointer;" onclick="location.href='profile.html'">
           <div class="contact-name" style="margin-bottom:0">Global Lounge</div>
-          <div style="font-size: 12px; color: #4ade80;">Online</div>
+          <div class="status-text">Online</div>
         </div>
       </div>
       <div style="display: flex; gap: 12px;">
@@ -350,9 +371,9 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span>Chats</span>
   </a>
-  <a href="search.html" class="nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-    <span>Search</span>
+  <a href="ai-chat.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10 10 10 0 0 1-10-10 10 10 0 0 1 10-10zm0 18a8 8 0 0 0 8-8 8 8 0 0 0-8-8 8 8 0 0 0-8 8 8 8 0 0 0 8 8zm0-13a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5z"/></svg>
+    <span>AI</span>
   </a>
   <a href="profile.html" class="nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>

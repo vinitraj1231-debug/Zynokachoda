@@ -92,16 +92,32 @@
           <label class="form-label" for="email">Email Address</label>
           <input type="email" id="email" class="form-input" placeholder="name@example.com" required>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="password-group">
           <label class="form-label" for="password">Password</label>
           <input type="password" id="password" class="form-input" placeholder="••••••••" required>
         </div>
         <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 8px;">
-          Sign In
+          Continue
         </button>
       </form>
 
-      <div class="center" style="margin-top: 24px;">
+      <form id="otp-form" style="display: none;">
+        <div class="center" style="margin-bottom: 24px;">
+          <h3 class="section-title" style="font-size: 20px;">Verify OTP</h3>
+          <p class="section-sub">Enter the 6-digit code sent to your email</p>
+        </div>
+        <div class="form-group">
+          <input type="text" id="otp-input" class="form-input center" placeholder="000000" maxlength="6" style="font-size: 24px; letter-spacing: 8px; font-weight: 700;" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 8px;">
+          Verify & Sign In
+        </button>
+        <div class="center" style="margin-top: 16px;">
+          <p class="form-notice">Didn't get the code? <a href="#" id="resend-otp" style="color: var(--accent-v); font-weight: 600;">Resend</a></p>
+        </div>
+      </form>
+
+      <div class="center" id="toggle-auth-container" style="margin-top: 24px;">
         <p class="form-notice">
           Don't have an account? <a href="#" id="toggle-auth" style="color: var(--accent-v); font-weight: 600;">Sign up</a>
         </p>
