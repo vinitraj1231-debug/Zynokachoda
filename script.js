@@ -7,7 +7,7 @@
   'use strict';
 
   /* ── Sticky Nav ─────────────────────────────────────────── */
-  const nav = document.querySelector('.nav');
+  const nav = document.querySelector('.nav, .app-header');
   if (nav) {
     const onScroll = () => {
       nav.classList.toggle('scrolled', window.scrollY > 20);
@@ -150,7 +150,7 @@
       let valid = true;
       contactForm.querySelectorAll('[required]').forEach(field => {
         if (!field.value.trim()) {
-          field.style.borderColor = '#f87171';
+          field.style.borderColor = 'var(--text-1)';
           valid = false;
         } else {
           field.style.borderColor = '';
@@ -168,7 +168,7 @@
         submitBtn.textContent = 'Send Message';
         if (statusEl) {
           statusEl.textContent = '✓ Message received! We will get back to you within 24 hours.';
-          statusEl.style.color = '#4ade80';
+          statusEl.style.color = 'var(--text-1)';
           statusEl.style.display = 'block';
           setTimeout(() => { statusEl.style.display = 'none'; }, 5000);
         }

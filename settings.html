@@ -26,7 +26,7 @@
       letter-spacing: 0.1em;
     }
     .settings-card {
-      background: var(--bg-1);
+      background: var(--bg-0);
       border: 1px solid var(--border-1);
       border-radius: var(--radius-m);
       overflow: hidden;
@@ -40,7 +40,7 @@
       cursor: pointer;
     }
     .settings-row:last-child { border-bottom: none; }
-    .settings-row:hover { background: var(--bg-2); }
+    .settings-row:hover { background: var(--bg-1); }
 
     .settings-info {
       display: flex;
@@ -81,7 +81,7 @@
       background-color: #fff;
       transition: .4s;
       border-radius: 50%;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow-sm);
     }
     input:checked + .slider { background-color: var(--accent-v); }
     input:checked + .slider:before { transform: translateX(20px); }
@@ -92,7 +92,12 @@
 <header class="app-header">
   <div class="header-inner">
     <div class="header-left">
-      <h1 class="app-logo-text">Settings</h1>
+      <h1 class="app-logo-text">Zyno</h1>
+    </div>
+    <div class="header-right">
+      <a href="profile.html" class="profile-box-link" style="display: block;">
+        <div class="profile-box"></div>
+      </a>
     </div>
   </div>
 </header>
@@ -161,14 +166,20 @@
   </div>
 
   <div style="padding: 16px;">
-    <button id="logout-btn-settings" class="btn btn-secondary btn-lg" style="width: 100%; border-color: #ff4444; color: #ff4444;">
+    <button id="logout-btn-settings" class="btn btn-secondary btn-lg" style="width: 100%; border-color: var(--text-1); color: var(--text-1);">
       Logout Account
     </button>
   </div>
 </main>
 
 
-<nav class="bottom-nav">
+
+
+
+</body>
+</html>
+
+<nav class="bottom-nav" id="main-bottom-nav">
   <a href="index.html" class="nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     <span>Home</span>
@@ -190,7 +201,7 @@
     <span>Settings</span>
   </a>
 </nav>
-
+<script src="script.js"></script>
 <script src="app.js" type="module"></script>
 </body>
 </html>

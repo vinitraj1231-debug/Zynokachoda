@@ -3,46 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard — Zynochat</title>
+  <title>Admin Panel — Zynochat</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
     .admin-container {
-      padding-top: var(--nav-h);
-      min-height: 100vh;
+      padding: 80px 16px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .stat-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .stat-card {
+      padding: 16px;
       background: var(--bg-0);
-    }
-    .admin-content {
-      padding: 40px 0;
-    }
-    .admin-card {
-      background: var(--bg-card);
       border: 1px solid var(--border-1);
-      border-radius: var(--radius-l);
-      padding: 32px;
-      margin-bottom: 32px;
+      border-radius: var(--radius-m);
+      text-align: center;
+    }
+    .stat-val {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--accent-v);
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-3);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .admin-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
     .admin-table-wrap {
+      background: var(--bg-0);
+      border: 1px solid var(--border-1);
+      border-radius: var(--radius-m);
       overflow-x: auto;
     }
     .admin-table {
       width: 100%;
-      border-collapse: collapse
+      border-collapse: collapse;
       font-size: 13px;
     }
     .admin-table th, .admin-table td {
       padding: 12px;
-
-      font-size: 14px;
-    }
-    .admin-table th, .admin-table td {
-      padding: 16px;
- main
       text-align: left;
       border-bottom: 1px solid var(--border-1);
     }
     .admin-table th {
-supabase-auth-monochrome-theme-4940734669931196696
-      background: var(--bg-2);
+      background: var(--bg-1);
       color: var(--text-3);
       text-transform: uppercase;
       font-size: 11px;
@@ -54,7 +69,7 @@ supabase-auth-monochrome-theme-4940734669931196696
       border: 1px solid var(--border-1);
       cursor: pointer;
     }
-    .btn-ban { color: #ff4444; border-color: #ff4444; }
+    .btn-ban { color: var(--text-1); border-color: var(--text-1); }
   </style>
 </head>
 <body class="bg-0">
@@ -62,7 +77,12 @@ supabase-auth-monochrome-theme-4940734669931196696
 <header class="app-header">
   <div class="header-inner">
     <div class="header-left">
-      <h1 class="app-logo-text">Admin Panel</h1>
+      <h1 class="app-logo-text">Zyno</h1>
+    </div>
+    <div class="header-right">
+      <a href="profile.html" class="profile-box-link" style="display: block;">
+        <div class="profile-box"></div>
+      </a>
     </div>
   </div>
 </header>
@@ -119,7 +139,7 @@ supabase-auth-monochrome-theme-4940734669931196696
 </main>
 
 
-<nav class="bottom-nav">
+<nav class="bottom-nav" id="main-bottom-nav">
   <a href="index.html" class="nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     <span>Home</span>
@@ -142,88 +162,7 @@ supabase-auth-monochrome-theme-4940734669931196696
   </a>
 </nav>
 
-      font-family: var(--font-head);
-      text-transform: uppercase;
-      font-size: 12px;
-      letter-spacing: 0.1em;
-      color: var(--text-3);
-    }
-    .admin-table tr:hover td {
-      background: var(--bg-card-hover);
-    }
-    .btn-delete {
-      background: #ff4444;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-    .btn-delete:hover {
-      background: #cc0000;
-    }
-    .status-badge {
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-    .status-admin {
-      background: var(--accent-v-dim);
-      color: var(--accent-v);
-      border: 1px solid var(--border-2);
-    }
-  </style>
-</head>
-<body>
-
-<nav class="nav scrolled">
-  <div class="container">
-    <div class="nav-inner">
-      <a href="index.html" class="nav-logo">
-        <div class="logo-icon">
-          <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2C5.58 2 2 5.58 2 10c0 1.85.6 3.56 1.6 4.95L2.05 17.5a.5.5 0 00.63.63l2.55-1.55A7.96 7.96 0 0010 18c4.42 0 8-3.58 8-8s-3.58-8-8-8zm-3 6h6a.5.5 0 010 1H7a.5.5 0 010-1zm0 2.5h4a.5.5 0 010 1H7a.5.5 0 010-1z"/></svg>
-        </div>
-        Zynochat <span class="status-badge status-admin" style="margin-left: 8px;">Admin</span>
-      </a>
-      <div id="user-profile" style="display: flex; align-items: center; gap: 12px;">
-        <span id="user-name" class="contact-name" style="margin-bottom:0">Admin</span>
-        <button id="logout-btn" class="btn btn-sm btn-ghost">Logout</button>
-      </div>
-    </div>
-  </div>
-</nav>
-
-<div class="admin-container">
-  <div class="container admin-content">
-    <header style="margin-bottom: 32px;">
-      <h1 class="section-title">Admin Control Panel</h1>
-      <p class="section-sub">Manage messages and monitor platform activity.</p>
-    </header>
-
-    <div class="admin-card">
-      <h2 class="card-title" style="margin-bottom: 24px;">Recent Messages</h2>
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Message</th>
-              <th>Time</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="admin-messages-body">
-            <!-- Messages will be populated here -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
- main
-
 <script src="app.js" type="module"></script>
+<script src="script.js"></script>
 </body>
 </html>
