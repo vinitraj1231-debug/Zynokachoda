@@ -1,7 +1,34 @@
 const express = require('express');
 const path = require('path');
+const helmet = require('helmet');
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Use helmet for security headers
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable CSP for now to avoid breaking existing CDN imports
+}));
+
+// Middleware to block access to sensitive files
+app.use((req, res, next) => {
+  const sensitiveFiles = [
+    'package.json',
+    'package-lock.json',
+    'render.yaml',
+    'server.js',
+    'server_output.log',
+    'admin.html',
+    '.gitignore'
+  ];
+
+  const requestedFile = path.basename(req.path);
+
+  // Block specific sensitive files or any hidden files (starting with .)
+  if (sensitiveFiles.includes(requestedFile) || requestedFile.startsWith('.')) {
+    return res.status(403).send('Forbidden');
+  }
+  next();
+});
 
 // Serve static files from the current directory
 app.use(express.static(path.join(__dirname, '.')));
