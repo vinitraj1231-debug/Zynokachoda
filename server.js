@@ -1,7 +1,26 @@
 const express = require('express');
 const path = require('path');
+const helmet = require('helmet');
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Use helmet for secure headers (CSP disabled to maintain compatibility with existing CDNs)
+app.use(helmet({
+  contentSecurityPolicy: false,
+}));
+
+// Block access to sensitive files and hidden dotfiles
+app.use((req, res, next) => {
+  const sensitiveFiles = ['package.json', 'package-lock.json', 'server.js', 'render.yaml', 'SUPABASE_SETUP.sql', '.gitignore'];
+  const basename = path.basename(req.path);
+  const isSensitive = sensitiveFiles.includes(basename);
+  const isDotFile = basename.startsWith('.') || req.path.split('/').some(segment => segment.startsWith('.'));
+
+  if (isSensitive || isDotFile) {
+    return res.status(403).send('Access Forbidden');
+  }
+  next();
+});
 
 // Serve static files from the current directory
 app.use(express.static(path.join(__dirname, '.')));
