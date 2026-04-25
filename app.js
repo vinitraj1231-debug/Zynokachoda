@@ -134,7 +134,15 @@ supabase.auth.onAuthStateChange((event, session) => {
 
     if (path === '/login' || path === '/login.html') window.location.href = '/index.html';
   } else {
-    if (path === '/chat' || path === '/chat.html' || path === '/profile.html' || path === '/settings.html' || path === '/index.html') window.location.href = '/login.html';
+    // Protected routes that require authentication
+    const protectedRoutes = [
+      '/chat', '/chat.html',
+      '/profile.html',
+      '/settings.html',
+      '/index.html',
+      '/admin', '/admin.html'
+    ];
+    if (protectedRoutes.includes(path)) window.location.href = '/login.html';
   }
 });
 
