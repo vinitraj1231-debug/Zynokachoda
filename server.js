@@ -3,6 +3,22 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Security middleware to block sensitive files and directories
+app.use((req, res, next) => {
+  const sensitiveFiles = ['package.json', 'package-lock.json', 'server.js', 'render.yaml', '.gitignore'];
+  const segments = req.path.split('/');
+
+  // Check if any segment of the path is a dotfile or matches sensitive filenames
+  const isForbidden = segments.some(segment =>
+    segment.startsWith('.') || sensitiveFiles.includes(segment)
+  );
+
+  if (isForbidden) {
+    return res.status(403).send('Forbidden');
+  }
+  next();
+});
+
 // Serve static files from the current directory
 app.use(express.static(path.join(__dirname, '.')));
 
