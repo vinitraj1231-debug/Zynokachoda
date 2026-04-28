@@ -23,6 +23,9 @@
 
 <body>
 
+<div class="mesh-bg"></div>
+<div class="loading-bar" id="loading-bar"></div>
+
 <!-- ── Header ──────────────────────────────────────────── -->
 <header class="app-header">
   <div class="header-inner">
@@ -43,10 +46,18 @@
 </header>
 
 <main>
-    <!-- ── Banner ──────────────────────────────────────────────── -->
-    <section class="banner-section">
-      <div class="ad-banner">
-        <span class="banner-placeholder">Access the future of messaging</span>
+    <!-- ── Hero ────────────────────────────────────────────────── -->
+    <section class="section center">
+      <div class="container">
+        <div class="fade-up">
+          <span class="section-label">Evolution in real-time</span>
+          <h1 class="section-title">The Most <span class="grad-text">Advanced Chat</span> Platform Ever Built</h1>
+          <p class="section-sub">Experience a seamless ecosystem of privacy, speed, and intelligence. Powered by a high-performance Python core.</p>
+          <div style="margin-top: 48px; display: flex; justify-content: center; gap: 16px;">
+            <a href="chat.html" class="btn btn-primary">Start Chatting</a>
+            <a href="features.html" class="btn btn-ghost">Learn More</a>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -220,6 +231,13 @@
 </nav>
 
 <script>
+    // Advanced Loading Bar
+    window.addEventListener('load', () => {
+        const bar = document.getElementById('loading-bar');
+        bar.style.width = '100%';
+        setTimeout(() => { bar.style.opacity = '0'; }, 500);
+    });
+
     // Intersection Observer for fade-up animation
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {

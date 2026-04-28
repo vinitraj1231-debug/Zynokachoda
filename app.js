@@ -405,7 +405,7 @@ function startPersonalChat(user) {
   contactItem.click();
 }
 
-// AI Assistant Logic (Simulation)
+// AI Assistant Logic (Python Backend Integration)
 const aiForm = document.getElementById('ai-form');
 const aiMessages = document.getElementById('ai-messages');
 const aiInput = document.getElementById('ai-input');
@@ -419,7 +419,7 @@ if (aiForm && aiMessages) {
 
     // Add user message
     const userMsg = document.createElement('div');
-    userMsg.className = 'ai-bubble user';
+    userMsg.className = 'message sent';
     userMsg.textContent = text;
     aiMessages.appendChild(userMsg);
     aiInput.value = '';
@@ -428,15 +428,24 @@ if (aiForm && aiMessages) {
     // Show typing indicator
     if (aiTyping) aiTyping.style.display = 'block';
 
-    // Simulate OpenRouter API call
-    setTimeout(() => {
-      if (aiTyping) aiTyping.style.display = 'none';
+    try {
+        const response = await fetch('/api/ai/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text })
+        });
+        const data = await response.json();
 
-      const botMsg = document.createElement('div');
-      botMsg.className = 'ai-bubble bot';
-      botMsg.textContent = `As your Zyno AI, I've processed your request: "${text}". Currently, I'm in simulation mode. In production, I will connect via OpenRouter API.`;
-      aiMessages.appendChild(botMsg);
-      aiMessages.scrollTop = aiMessages.scrollHeight;
-    }, 1500);
+        if (aiTyping) aiTyping.style.display = 'none';
+
+        const botMsg = document.createElement('div');
+        botMsg.className = 'message received';
+        botMsg.textContent = data.reply;
+        aiMessages.appendChild(botMsg);
+        aiMessages.scrollTop = aiMessages.scrollHeight;
+    } catch (err) {
+        console.error('AI Error:', err);
+        if (aiTyping) aiTyping.style.display = 'none';
+    }
   });
 }
