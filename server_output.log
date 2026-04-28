@@ -1,1 +1,25 @@
-Server is running securely on http://localhost:3000
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26348]
+INFO:     Started server process [51764]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:3000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:38852 - "HEAD /login HTTP/1.1" 405 Method Not Allowed
+INFO:     127.0.0.1:38864 - "HEAD /chat HTTP/1.1" 405 Method Not Allowed
+INFO:     127.0.0.1:38870 - "HEAD /styles.css HTTP/1.1" 405 Method Not Allowed
+INFO:     127.0.0.1:38876 - "HEAD /package.json HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:38892 - "HEAD /non-existent-page HTTP/1.1" 405 Method Not Allowed
+INFO:     127.0.0.1:46530 - "GET /login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46534 - "GET /styles.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46542 - "GET /package.json HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:46546 - "GET /non-existent-page HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60862 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60862 - "GET /styles.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60874 - "GET /seo-config.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60888 - "GET /app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60888 - "GET /ai-chat.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60888 - "GET /script.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60888 - "GET /ai-chat.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60888 - "GET /chat HTTP/1.1" 200 OK
