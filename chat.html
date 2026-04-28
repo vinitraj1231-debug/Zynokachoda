@@ -5,274 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chat — Zynochat</title>
   <link rel="stylesheet" href="styles.css" />
-  <style>
-    :root {
-      --sidebar-w: 320px;
-    }
-    body {
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    .chat-container {
-      flex: 1;
-      display: flex;
-      height: calc(100vh - var(--nav-h));
-      position: relative;
-    }
-    /* Sidebar */
-    .chat-sidebar {
-      width: var(--sidebar-w);
-      background: var(--bg-0);
-      border-right: 1px solid var(--border-1);
-      display: flex;
-      flex-direction: column;
-      z-index: 10;
-    }
-    .sidebar-header {
-      padding: 16px 16px 0;
-      border-bottom: 1px solid var(--border-1);
-    }
-    .chat-tabs {
-      display: flex;
-      gap: 16px;
-      overflow-x: auto;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border-1);
-      scrollbar-width: none;
-    }
-    .chat-tabs::-webkit-scrollbar { display: none; }
-    .chat-tab {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-3);
-      white-space: nowrap;
-      padding-bottom: 8px;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-    }
-    .chat-tab.active {
-      color: var(--accent-v);
-      border-color: var(--accent-v);
-    }
-    .btn-create-floating {
-      position: absolute;
-      bottom: 24px;
-      right: 24px;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: var(--grad-brand);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: var(--shadow-md);
-      cursor: pointer;
-      z-index: 20;
-    }
-    .search-wrap {
-      background: var(--bg-1);
-      border-radius: var(--radius-s);
-      padding: 8px 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .search-input {
-      background: none;
-      border: none;
-      color: inherit;
-      font-size: 14px;
-      width: 100%;
-    }
-    .search-input:focus { outline: none; }
-
-    .contact-list {
-      flex: 1;
-      overflow-y: auto;
-    }
-    .contact-item {
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      transition: background var(--t-fast);
-      border-bottom: 1px solid rgba(255,255,255,0.02);
-    }
-    .contact-item:hover, .contact-item.active {
-      background: var(--bg-card);
-    }
-    .contact-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: var(--grad-brand);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      color: #fff;
-      flex-shrink: 0;
-    }
-    .contact-info {
-      flex: 1;
-      min-width: 0;
-    }
-    .contact-name {
-      font-weight: 600;
-      font-size: 15px;
-      margin-bottom: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .contact-last-msg {
-      font-size: 13px;
-      color: var(--text-3);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* Main Chat Area */
-    .chat-main {
-      padding-bottom: var(--bottom-nav-h);
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: var(--bg-0);
-      position: relative;
-    }
-    .chat-header {
-      height: 64px;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border-1);
-      background: var(--bg-0);
-      backdrop-filter: blur(10px);
-    }
-    .chat-messages {
-      flex: 1;
-      padding: 24px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .message {
-      max-width: 70%;
-      padding: 12px 16px;
-      border-radius: var(--radius-m);
-      font-size: 14.5px;
-      position: relative;
-    }
-    .message.received {
-      align-self: flex-start;
-      background: var(--bg-1);
-      border-bottom-left-radius: 4px;
-    }
-    .message.sent {
-      align-self: flex-end;
-      background: var(--accent-v);
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-    .message-time {
-      font-size: 10px;
-      opacity: 0.6;
-      margin-top: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 4px;
-    }
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--text-1);
-      display: inline-block;
-      margin-right: 4px;
-    }
-    .status-text {
-      font-size: 12px;
-      color: inherit;
-    }
-    .ticks {
-      color: inherit;
-      font-weight: 700;
-    }
-
-    .chat-input-area {
-      padding-bottom: calc(16px + var(--bottom-nav-h));
-      padding: 16px 24px;
-      background: var(--bg-0);
-      border-top: 1px solid var(--border-1);
-    }
-    .input-form {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-    .message-input {
-      flex: 1;
-      background: var(--bg-1);
-      border: 1px solid var(--border-1);
-      border-radius: 24px;
-      padding: 10px 20px;
-      color: inherit;
-      font-size: 14.5px;
-    }
-    .message-input:focus {
-      outline: none;
-      border-color: var(--accent-v);
-    }
-    .btn-send {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: var(--grad-brand);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: none;
-      cursor: pointer;
-      transition: transform var(--t-fast);
-    }
-    .btn-send:hover { transform: scale(1.05); }
-
-    @media (max-width: 768px) {
-      .chat-sidebar {
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 100%;
-        transform: translateX(-100%);
-        transition: transform var(--t-med);
-      }
-      .chat-sidebar.open {
-        transform: translateX(0);
-      }
-    }
-  </style>
+  <script src="seo-config.js"></script>
 </head>
 <body>
 
 <header class="app-header">
   <div class="header-inner">
     <div class="header-left">
-      <h1 class="app-logo-text">Zyno</h1>
+      <h1 class="app-logo-text">
+        <div class="logo-icon-main">
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2C5.58 2 2 5.58 2 10c0 1.85.6 3.56 1.6 4.95L2.05 17.5a.5.5 0 00.63.63l2.55-1.55A7.96 7.96 0 0010 18c4.42 0 8-3.58 8-8s-3.58-8-8-8zm-3 6h6a.5.5 0 010 1H7a.5.5 0 010-1zm0 2.5h4a.5.5 0 010 1H7a.5.5 0 010-1z"/></svg>
+        </div>
+        Zyno
+      </h1>
     </div>
     <div class="header-right">
-      <a href="profile.html" class="profile-box-link" style="display: block;">
-        <div class="profile-box"></div>
+      <a href="profile.html" class="profile-box-link">
+        <div class="profile-box" id="user-dp">Z</div>
       </a>
     </div>
   </div>
@@ -280,30 +29,16 @@
 
 <div class="chat-container">
   <aside class="chat-sidebar" id="sidebar">
-    <div class="sidebar-header" style="border-bottom:none;">
-      <div class="search-wrap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" id="user-search-input" class="search-input" placeholder="Search by @username...">
-      </div>
-      <div id="search-results-overlay" class="search-overlay" style="display: none;">
-        <!-- Dynamic search results will appear here -->
-      </div>
+    <div style="padding: 24px;">
+        <input type="text" id="user-search-input" class="auth-input" placeholder="Search users..." style="margin-bottom: 0;">
+        <div id="search-results-overlay" class="glass-panel" style="display: none; position: absolute; width: calc(100% - 48px); z-index: 100; border-radius: 12px; margin-top: 8px;"></div>
     </div>
-    <div class="chat-tabs">
-      <div class="chat-tab active">All</div>
-      <div class="chat-tab">Personal</div>
-      <div class="chat-tab">Groups</div>
-      <div class="chat-tab">Channels</div>
-      <div class="chat-tab">Bots</div>
-      <div class="chat-tab" style="font-size: 18px;">+</div>
-    </div>
-    <div class="contact-list" id="contact-list">
-      <!-- Contacts will be populated here -->
-      <div class="contact-item active">
-        <div class="contact-avatar">G</div>
+    <div class="contact-list" id="contact-list" style="overflow-y: auto; flex: 1;">
+      <div class="contact-item active" style="padding: 16px 24px; display: flex; gap: 12px; align-items: center; cursor: pointer; background: var(--bg-card);">
+        <div class="profile-box" style="width: 40px; height: 40px; border-radius: 50%;">G</div>
         <div class="contact-info">
-          <div class="contact-name">Global Lounge</div>
-          <div class="contact-last-msg">Welcome to Zynochat! Say hello to everyone.</div>
+          <div class="contact-name" style="font-weight: 600; font-size: 15px;">Global Lounge</div>
+          <div class="contact-last-msg" style="font-size: 13px; color: var(--text-3);">Welcome to Zynochat!</div>
         </div>
       </div>
     </div>
@@ -312,82 +47,60 @@
   <main class="chat-main">
     <header class="chat-header">
       <div style="display: flex; align-items: center; gap: 12px;">
-        <button id="sidebar-toggle-mobile" class="btn-icon-only" style="display:none;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-        <div class="contact-avatar" style="width: 40px; height: 40px;">G</div>
-        <div style="cursor: pointer;" onclick="location.href='profile.html'">
-          <div class="contact-name" style="margin-bottom:0">Global Lounge</div>
-          <div class="status-text">Online</div>
+        <div class="profile-box" style="width: 40px; height: 40px; border-radius: 50%;">G</div>
+        <div>
+          <div class="contact-name" style="font-weight: 700;">Global Lounge</div>
+          <div style="font-size: 12px; color: var(--text-3);">Community Chat</div>
         </div>
-      </div>
-      <div style="display: flex; gap: 12px;">
-        <button class="btn-icon-only"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
-        <button class="btn-icon-only"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
       </div>
     </header>
 
     <div class="chat-messages" id="chat-messages">
-      <!-- Messages will appear here -->
       <div class="message received">
         Welcome to the Global Lounge! Start chatting with other Zynochat users.
-        <span class="message-time">10:00 AM</span>
       </div>
     </div>
 
     <div class="chat-input-area">
       <form class="input-form" id="chat-form">
-        <input type="text" id="message-input" class="message-input" placeholder="Type a message..." autocomplete="off">
+        <input type="text" id="message-input" class="message-input" placeholder="Message Global Lounge..." autocomplete="off">
         <button type="submit" class="btn-send">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
         </button>
       </form>
     </div>
-    <div class="btn-create-floating" id="open-creator">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
-    </div>
-
-    <!-- Creator Menu -->
-    <div id="creator-menu" class="creator-menu">
-      <div class="creator-option" onclick="location.href='create.html?type=group'">
-        <span>New Group</span>
-      </div>
-      <div class="creator-option" onclick="location.href='create.html?type=channel'">
-        <span>New Channel</span>
-      </div>
-      <div class="creator-option">
-        <span>New Bot</span>
-      </div>
-      <div class="creator-option">
-        <span>New Story</span>
-      </div>
-    </div>
   </main>
 </div>
 
-<nav class="bottom-nav" id="main-bottom-nav">
+<nav class="bottom-nav">
   <a href="index.html" class="nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
     <span>Home</span>
   </a>
   <a href="chat.html" class="nav-item active">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span>Chats</span>
   </a>
   <a href="ai-chat.html" class="nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
     <span>AI</span>
   </a>
   <a href="profile.html" class="nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     <span>Profile</span>
   </a>
   <a href="settings.html" class="nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg>
     <span>Settings</span>
   </a>
 </nav>
+
 <script src="script.js"></script>
 <script src="app.js" type="module"></script>
+<script>
+    if (typeof updateMetaTags === 'function') {
+        updateMetaTags('Chats', 'Connect with your communities on Zynochat.');
+    }
+</script>
 </body>
 </html>
