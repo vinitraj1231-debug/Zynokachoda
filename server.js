@@ -3,6 +3,23 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Security middleware to block access to sensitive files and hidden dotfiles
+app.use((req, res, next) => {
+  const sensitiveFiles = ['package.json', 'package-lock.json', 'server.js', 'render.yaml', '.gitignore'];
+  const pathSegments = req.path.split('/');
+
+  // Block any segment that is a sensitive file or starts with a dot (hidden file/dir)
+  const isForbidden = pathSegments.some(segment => {
+    const s = segment.toLowerCase();
+    return sensitiveFiles.includes(s) || (s.startsWith('.') && s !== '.' && s !== '..');
+  });
+
+  if (isForbidden) {
+    return res.status(403).send('Forbidden');
+  }
+  next();
+});
+
 // Serve static files from the current directory
 app.use(express.static(path.join(__dirname, '.')));
 
