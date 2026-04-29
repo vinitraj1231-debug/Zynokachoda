@@ -119,8 +119,16 @@ supabase.auth.onAuthStateChange((event, session) => {
   const user = session?.user;
   const userNameEl = document.getElementById('user-name');
   const path = window.location.pathname;
+  const isAdminPage = path === '/admin' || path === '/admin.html';
+  const isAdmin = user?.email === 'Kvinit6421@gmail.com';
 
   if (user) {
+    // Admin access control
+    if (isAdminPage && !isAdmin) {
+      window.location.href = '/index.html';
+      return;
+    }
+
     const name = user.user_metadata?.full_name || user.email;
     if (userNameEl) userNameEl.textContent = name;
 
@@ -134,7 +142,10 @@ supabase.auth.onAuthStateChange((event, session) => {
 
     if (path === '/login' || path === '/login.html') window.location.href = '/index.html';
   } else {
-    if (path === '/chat' || path === '/chat.html' || path === '/profile.html' || path === '/settings.html' || path === '/index.html') window.location.href = '/login.html';
+    const protectedRoutes = ['/chat', '/chat.html', '/profile.html', '/settings.html', '/index.html', '/admin', '/admin.html'];
+    if (protectedRoutes.includes(path)) {
+      window.location.href = '/login.html';
+    }
   }
 });
 
