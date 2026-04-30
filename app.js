@@ -174,7 +174,11 @@ if (chatForm && chatMessages) {
         const timeText = data.createdAt?.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) || 'Just now';
 
         if (isMe) {
-          timeSpan.innerHTML = `${timeText} <span class="ticks">✓✓</span>`;
+          timeSpan.textContent = timeText + ' ';
+          const ticks = document.createElement('span');
+          ticks.className = 'ticks';
+          ticks.textContent = '✓✓';
+          timeSpan.appendChild(ticks);
         } else {
           timeSpan.textContent = timeText;
         }
@@ -329,18 +333,32 @@ if (userSearchInput && searchOverlay) {
       { id: '3', username: 'alex_chat', full_name: 'Alex' },
     ].filter(u => u.username.includes(queryStr.replace('@', '')));
 
-    searchOverlay.innerHTML = '';
+    searchOverlay.textContent = '';
     if (users.length > 0) {
       users.forEach(u => {
         const div = document.createElement('div');
         div.className = 'search-result-item';
-        div.innerHTML = `
-          <div class="contact-avatar">${u.full_name.charAt(0)}</div>
-          <div class="contact-info">
-            <div class="contact-name">${u.full_name}</div>
-            <div class="contact-last-msg">@${u.username}</div>
-          </div>
-        `;
+
+        const avatar = document.createElement('div');
+        avatar.className = 'contact-avatar';
+        avatar.textContent = u.full_name.charAt(0);
+
+        const info = document.createElement('div');
+        info.className = 'contact-info';
+
+        const name = document.createElement('div');
+        name.className = 'contact-name';
+        name.textContent = u.full_name;
+
+        const handle = document.createElement('div');
+        handle.className = 'contact-last-msg';
+        handle.textContent = `@${u.username}`;
+
+        info.appendChild(name);
+        info.appendChild(handle);
+        div.appendChild(avatar);
+        div.appendChild(info);
+
         div.onclick = () => {
           startPersonalChat(u);
           searchOverlay.style.display = 'none';
@@ -370,13 +388,26 @@ function startPersonalChat(user) {
   // Add new contact item
   const contactItem = document.createElement('div');
   contactItem.className = 'contact-item';
-  contactItem.innerHTML = `
-    <div class="contact-avatar">${user.full_name.charAt(0)}</div>
-    <div class="contact-info">
-      <div class="contact-name">${user.full_name}</div>
-      <div class="contact-last-msg">Start chatting with @${user.username}</div>
-    </div>
-  `;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'contact-avatar';
+  avatar.textContent = user.full_name.charAt(0);
+
+  const info = document.createElement('div');
+  info.className = 'contact-info';
+
+  const name = document.createElement('div');
+  name.className = 'contact-name';
+  name.textContent = user.full_name;
+
+  const lastMsg = document.createElement('div');
+  lastMsg.className = 'contact-last-msg';
+  lastMsg.textContent = `Start chatting with @${user.username}`;
+
+  info.appendChild(name);
+  info.appendChild(lastMsg);
+  contactItem.appendChild(avatar);
+  contactItem.appendChild(info);
 
   contactItem.onclick = () => {
     document.querySelectorAll('.contact-item').forEach(i => i.classList.remove('active'));
@@ -387,12 +418,17 @@ function startPersonalChat(user) {
 
     const chatMessages = document.getElementById('chat-messages');
     if (chatMessages) {
-      chatMessages.innerHTML = `
-        <div class="message received">
-          Hi! This is the start of your personal chat with ${user.full_name}.
-          <span class="message-time">Just now</span>
-        </div>
-      `;
+      chatMessages.textContent = ''; // Clear chat
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message received';
+      msgDiv.textContent = `Hi! This is the start of your personal chat with ${user.full_name}.`;
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'message-time';
+      timeSpan.textContent = 'Just now';
+
+      msgDiv.appendChild(timeSpan);
+      chatMessages.appendChild(msgDiv);
     }
 
     if (window.innerWidth <= 768) {
