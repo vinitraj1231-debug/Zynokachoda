@@ -1,0 +1,4 @@
+## 2026-05-05 - Critical ACE in protobufjs and XSS in app.js
+**Vulnerability:** Critical Arbitrary Code Execution (ACE) in transitive dependency `protobufjs` (< 7.5.5) and high-priority DOM-based XSS in `app.js` due to unsafe `innerHTML` usage.
+**Learning:** Transitive dependencies can introduce critical risks even if direct dependencies are up to date. Using `innerHTML` with user-controlled data (like usernames or full names from a database) is a classic XSS vector that bypasses basic sanitization if not handled by a dedicated library or safe DOM APIs.
+**Prevention:** Use `overrides` in `package.json` to force secure versions of transitive dependencies. Consistently use `textContent` and manual DOM element creation (`createElement`) instead of template strings with `innerHTML` for rendering dynamic content.
