@@ -1,0 +1,4 @@
+## 2026-05-07 - Critical ACE in protobufjs (Transitive Dependency)
+**Vulnerability:** A critical Arbitrary Code Execution (ACE) vulnerability (GHSA-xq3m-2v4x-88gg) exists in `protobufjs` versions prior to 7.5.5 due to insecure handling of user-controlled inputs in certain functions.
+**Learning:** Critical vulnerabilities can be introduced through transitive dependencies (in this case, via `firebase` -> `@firebase/firestore` -> `@grpc/proto-loader`). Traditional `npm install` may not always update these deeply nested packages to secure versions if the parent package's semver ranges are restricted or if the lockfile is not aggressively refreshed.
+**Prevention:** Use the `overrides` field in `package.json` to explicitly force secure versions of transitive dependencies when they contain high-impact vulnerabilities that are not yet resolved by updates to the top-level package. Regularly run `npm audit` to identify such risks.
