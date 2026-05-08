@@ -5,22 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Assistant — Zynochat</title>
   <link rel="stylesheet" href="styles.css" />
-  <script src="seo-config.js"></script>
 </head>
 <body>
 
 <header class="app-header">
   <div class="header-inner">
     <div class="header-left">
-      <h1 class="app-logo-text">
-        <div class="logo-icon-main">
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2C5.58 2 2 5.58 2 10c0 1.85.6 3.56 1.6 4.95L2.05 17.5a.5.5 0 00.63.63l2.55-1.55A7.96 7.96 0 0010 18c4.42 0 8-3.58 8-8s-3.58-8-8-8zm-3 6h6a.5.5 0 010 1H7a.5.5 0 010-1zm0 2.5h4a.5.5 0 010 1H7a.5.5 0 010-1z"/></svg>
-        </div>
-        Zyno
-      </h1>
+      <a href="index.html" class="logo">
+        <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2C5.58 2 2 5.58 2 10c0 1.85.6 3.56 1.6 4.95L2.05 17.5a.5.5 0 00.63.63l2.55-1.55A7.96 7.96 0 0010 18c4.42 0 8-3.58 8-8s-3.58-8-8-8zm-3 6h6a.5.5 0 010 1H7a.5.5 0 010-1zm0 2.5h4a.5.5 0 010 1H7a.5.5 0 010-1z"/></svg>
+        <span>Zyno</span>
+      </a>
     </div>
     <div class="header-right">
-      <a href="profile.html" class="profile-box-link">
+      <a href="profile.html">
         <div class="profile-box" id="user-dp">Z</div>
       </a>
     </div>
@@ -30,13 +27,14 @@
 <main class="chat-main" style="height: 100vh; padding-top: var(--nav-h);">
     <div class="chat-messages" id="ai-messages">
         <div class="message received">
-            Hello! I am your Zyno AI Assistant, powered by OpenRouter. How can I help you today?
+            Hello! I am your Zyno AI Assistant. I can help you navigate the platform, answer questions about Zynochat, or just chat!
+            <span class="message-time">System</span>
         </div>
     </div>
 
-    <div id="ai-typing" style="padding: 0 24px; font-size: 12px; color: var(--text-3); display: none;">Zyno is thinking...</div>
+    <div id="ai-typing" style="padding: 0 24px; font-size: 12px; color: var(--text-3); display: none; margin-bottom: 120px;">Zyno is thinking...</div>
 
-    <div class="chat-input-area">
+    <div class="chat-input-area" style="bottom: 100px;">
       <form class="input-form" id="ai-form">
         <input type="text" id="ai-input" class="message-input" placeholder="Ask AI anything..." autocomplete="off">
         <button type="submit" class="btn-send">
@@ -48,33 +46,27 @@
 
 <nav class="bottom-nav">
   <a href="index.html" class="nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
     <span>Home</span>
   </a>
   <a href="chat.html" class="nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span>Chats</span>
   </a>
   <a href="ai-chat.html" class="nav-item active">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
     <span>AI</span>
   </a>
   <a href="profile.html" class="nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     <span>Profile</span>
   </a>
   <a href="settings.html" class="nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg>
     <span>Settings</span>
   </a>
 </nav>
 
-<script src="script.js"></script>
 <script src="app.js" type="module"></script>
-<script>
-    if (typeof updateMetaTags === 'function') {
-        updateMetaTags('AI Assistant', 'Chat with Zyno AI, your advanced personal assistant.');
-    }
-</script>
 </body>
 </html>

@@ -14,7 +14,7 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://www.gstatic.com"],
-      connectSrc: ["'self'", "https://*.supabase.co", "wss://*.supabase.co", "https://*.firebaseio.com", "wss://*.firebaseio.com"],
+      connectSrc: ["'self'", "https://*.supabase.co", "wss://*.supabase.co"],
       imgSrc: ["'self'", "data:", "https://*.supabase.co", "https://zynochat.in"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
