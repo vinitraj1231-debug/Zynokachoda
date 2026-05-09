@@ -27,8 +27,7 @@ app.use(helmet({
 // 2. CORS
 app.use(cors({
   origin: '*',
-  methods: ['GET', 'POST'],
-  credentials: true
+  methods: ['GET', 'POST']
 }));
 
 // 3. Rate Limiting
@@ -52,7 +51,7 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use((req, res, next) => {
   const segments = req.path.split('/');
   const isHidden = segments.some(segment => segment.startsWith('.') && segment.length > 1);
-  const sensitiveFiles = ['package.json', 'package-lock.json', 'server.js', 'render.yaml', '.gitignore', 'README.md'];
+  const sensitiveFiles = ['package.json', 'package-lock.json', 'server.js', 'render.yaml', '.gitignore', 'README.md', 'SUPABASE_SETUP.sql', 'server.log', 'server_output.log', 'server_test.log'];
 
   if (isHidden || sensitiveFiles.includes(segments[segments.length - 1])) {
     return res.status(403).send('Forbidden: Access is denied.');
