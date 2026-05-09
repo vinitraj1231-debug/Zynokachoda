@@ -1,442 +1,167 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Supabase configuration
-const supabaseUrl = 'YOUR_SUPABASE_URL';
-const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// IMPORTANT: Replace these with your actual Supabase project credentials
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
-// Firebase configuration (Keep for Firestore until fully migrated)
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// --- Helper: Safe DOM creation ---
+const createEl = (tag, props = {}, children = []) => {
+    const el = Object.assign(document.createElement(tag), props);
+    children.forEach(child => el.append(child));
+    return el;
 };
 
-const firebaseApp = initializeApp(firebaseConfig);
-const db = getFirestore(firebaseApp);
-
-// Auth Logic
+// --- Auth Handling ---
 const loginForm = document.getElementById('login-form');
 const otpForm = document.getElementById('otp-form');
 const toggleAuth = document.getElementById('toggle-auth');
-const googleBtn = document.getElementById('google-login');
-const githubBtn = document.getElementById('github-login');
-let isSignUp = false;
-let userEmail = '';
+const authTitle = document.getElementById('auth-title');
+const toggleText = document.getElementById('toggle-text');
+let isSignUp = false, userEmail = '';
 
 if (toggleAuth) {
-  toggleAuth.addEventListener('click', (e) => {
-    e.preventDefault();
-    isSignUp = !isSignUp;
-    const title = document.querySelector('.section-title');
-    const submitBtn = loginForm.querySelector('button[type="submit"]');
-    if (isSignUp) {
-      title.textContent = "Create Account";
-      submitBtn.textContent = "Sign Up";
-      toggleAuth.textContent = "Sign in";
-    } else {
-      title.textContent = "Welcome Back";
-      submitBtn.textContent = "Sign In";
-      toggleAuth.textContent = "Sign up";
-    }
-  });
+    toggleAuth.onclick = (e) => {
+        e.preventDefault();
+        isSignUp = !isSignUp;
+        if (authTitle) authTitle.textContent = isSignUp ? "Create Account" : "Welcome Back";
+        if (toggleText) toggleText.textContent = isSignUp ? "Already have an account?" : "Don't have an account?";
+        toggleAuth.textContent = isSignUp ? "Sign in" : "Sign up";
+        if (loginForm) loginForm.querySelector('button').textContent = isSignUp ? "Create Account" : "Continue";
+    };
 }
 
 if (loginForm) {
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    userEmail = email;
-
-    if (isSignUp) {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: email.split('@')[0], // Default name
-          }
-        }
-      });
-      if (error) {
-        alert(error.message);
-      } else {
-        // Switch to OTP form
-        loginForm.style.display = 'none';
-        if (otpForm) otpForm.style.display = 'block';
-        const toggleContainer = document.getElementById('toggle-auth-container');
-        if (toggleContainer) toggleContainer.style.display = 'none';
-      }
-    } else {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) alert(error.message);
-      else window.location.href = '/index.html';
-    }
-  });
+    loginForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value, password = document.getElementById('password').value;
+        userEmail = email;
+        const { error } = isSignUp ? await supabase.auth.signUp({ email, password, options: { data: { full_name: email.split('@')[0] } } }) : await supabase.auth.signInWithPassword({ email, password });
+        if (error) alert(error.message);
+        else if (isSignUp) { loginForm.style.display = 'none'; if (otpForm) otpForm.style.display = 'block'; }
+        else window.location.href = '/index.html';
+    };
 }
 
 if (otpForm) {
-  otpForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const token = document.getElementById('otp-input').value;
-
-    const { data, error } = await supabase.auth.verifyOtp({
-      email: userEmail,
-      token: token,
-      type: 'signup'
-    });
-
-    if (error) {
-      alert(error.message);
-    } else {
-      window.location.href = '/index.html';
-    }
-  });
+    otpForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const { error } = await supabase.auth.verifyOtp({ email: userEmail, token: document.getElementById('otp-input').value, type: 'signup' });
+        if (error) alert(error.message); else window.location.href = '/index.html';
+    };
 }
 
-if (googleBtn) {
-  googleBtn.addEventListener('click', async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
-    if (error) alert(error.message);
-  });
-}
+// OAuth Buttons
+const googleBtn = document.getElementById('google-login'), githubBtn = document.getElementById('github-login');
+if (googleBtn) googleBtn.onclick = () => supabase.auth.signInWithOAuth({ provider: 'google' });
+if (githubBtn) githubBtn.onclick = () => supabase.auth.signInWithOAuth({ provider: 'github' });
 
-if (githubBtn) {
-  githubBtn.addEventListener('click', async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'github' });
-    if (error) alert(error.message);
-  });
-}
+// --- Chat Logic ---
+const chatForm = document.getElementById('chat-form'), chatMessages = document.getElementById('chat-messages'), messageInput = document.getElementById('message-input');
+let activeChatId = null;
 
-// Global state for user
-supabase.auth.onAuthStateChange((event, session) => {
-  const user = session?.user;
-  const userNameEl = document.getElementById('user-name');
-  const path = window.location.pathname;
-
-  if (user) {
-    const name = user.user_metadata?.full_name || user.email;
-    if (userNameEl) userNameEl.textContent = name;
-
-    // Profile page updates
-    const pName = document.getElementById('profile-name');
-    const pHandle = document.getElementById('profile-handle');
-    const pDP = document.getElementById('user-dp');
-    if (pName) pName.textContent = name;
-    if (pHandle) pHandle.textContent = `@${user.email.split('@')[0]}`;
-    if (pDP) pDP.textContent = name.charAt(0).toUpperCase();
-
-    if (path === '/login' || path === '/login.html') window.location.href = '/index.html';
-  } else {
-    if (path === '/chat' || path === '/chat.html' || path === '/profile.html' || path === '/settings.html' || path === '/index.html') window.location.href = '/login.html';
-  }
-});
-
-const logoutBtn = document.getElementById('logout-btn');
-const logoutBtnSettings = document.getElementById('logout-btn-settings');
-
-async function handleLogout() {
-  await supabase.auth.signOut();
-  window.location.href = '/login.html';
-}
-
-if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
-if (logoutBtnSettings) logoutBtnSettings.addEventListener('click', handleLogout);
-
-// Chat Logic
-const chatForm = document.getElementById('chat-form');
-const chatMessages = document.getElementById('chat-messages');
-const messageInput = document.getElementById('message-input');
-
-if (chatForm && chatMessages) {
-  // Listen for messages
-  const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
-  onSnapshot(q, async (snapshot) => {
+async function loadMessages() {
+    if (!chatMessages) return;
     const { data: { user } } = await supabase.auth.getUser();
-    snapshot.docChanges().forEach((change) => {
-      if (change.type === "added") {
-        const data = change.doc.data();
-        const isMe = data.uid === user?.id;
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `message ${isMe ? 'sent' : 'received'}`;
-
-        const textNode = document.createTextNode(data.text);
-        msgDiv.appendChild(textNode);
-
-        const timeSpan = document.createElement('span');
-        timeSpan.className = 'message-time';
-        const timeText = data.createdAt?.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) || 'Just now';
-
-        if (isMe) {
-          timeSpan.innerHTML = `${timeText} <span class="ticks">✓✓</span>`;
-        } else {
-          timeSpan.textContent = timeText;
-        }
-
-        msgDiv.appendChild(timeSpan);
-        chatMessages.appendChild(msgDiv);
-      }
+    let query = supabase.from('messages').select('*, sender:profiles(full_name, avatar_url)').order('created_at', { ascending: true });
+    query = activeChatId ? query.or(`and(sender_id.eq.${activeChatId},receiver_id.eq.${user.id}),and(sender_id.eq.${user.id},receiver_id.eq.${activeChatId})`) : query.is('receiver_id', null);
+    const { data, error } = await query;
+    if (error) return console.error(error);
+    chatMessages.replaceChildren();
+    data.forEach(msg => {
+        const isMe = msg.sender_id === user?.id;
+        const div = createEl('div', { className: `message ${isMe ? 'sent' : 'received'}` }, [
+            createEl('div', { style: "font-size: 11px; opacity: 0.6; margin-bottom: 4px;", textContent: isMe ? 'You' : (msg.sender?.full_name || 'User') }),
+            createEl('div', { textContent: msg.text }),
+            createEl('span', { className: 'message-time', textContent: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })
+        ]);
+        chatMessages.append(div);
     });
     chatMessages.scrollTop = chatMessages.scrollHeight;
-  });
-
-  chatForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!messageInput.value.trim()) return;
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return alert('Please login to send messages');
-
-    await addDoc(collection(db, "messages"), {
-      text: messageInput.value,
-      uid: user.id,
-      displayName: user.user_metadata?.full_name || user.email,
-      photoURL: user.user_metadata?.avatar_url || '',
-      createdAt: serverTimestamp()
-    });
-
-    messageInput.value = '';
-  });
-
-  // Hide bottom nav when chat is active (mobile)
-  const mainBottomNav = document.getElementById('main-bottom-nav');
-  const chatNav = document.getElementById('chat-nav');
-
-  function hideNavs() {
-    if (window.innerWidth <= 768) {
-      if (mainBottomNav) mainBottomNav.style.display = 'none';
-      if (chatNav) chatNav.style.display = 'none';
-    }
-  }
-
-  // Toggle between contacts and chat view on mobile
-  const contactItems = document.querySelectorAll('.contact-item');
-  const sidebar = document.getElementById('sidebar');
-  contactItems.forEach(item => {
-    item.addEventListener('click', () => {
-      if (window.innerWidth <= 768) {
-        if (sidebar) sidebar.classList.remove('open');
-        hideNavs();
-      }
-    });
-  });
-
-  const sidebarToggle = document.getElementById('sidebar-toggle');
-  const sidebarToggleMobile = document.getElementById('sidebar-toggle-mobile');
-
-  function showSidebar() {
-    if (sidebar) sidebar.classList.add('open');
-    if (mainBottomNav) mainBottomNav.style.display = 'flex';
-    if (chatNav) chatNav.style.display = 'flex';
-    if (sidebarToggleMobile) sidebarToggleMobile.style.display = 'none';
-  }
-
-  if (sidebarToggle) sidebarToggle.addEventListener('click', showSidebar);
-  if (sidebarToggleMobile) sidebarToggleMobile.addEventListener('click', showSidebar);
-
-  // Creator Menu Toggle
-  const openCreatorBtn = document.getElementById('open-creator');
-  const creatorMenu = document.getElementById('creator-menu');
-  if (openCreatorBtn && creatorMenu) {
-    openCreatorBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      creatorMenu.classList.toggle('active');
-    });
-    document.addEventListener('click', () => {
-      creatorMenu.classList.remove('active');
-    });
-  }
 }
 
-// Help Form Logic
-const helpForm = document.getElementById('help-form');
-if (helpForm) {
-  helpForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const title = document.getElementById('ticket-title').value;
-    const category = document.getElementById('ticket-category').value;
-    const desc = document.getElementById('ticket-desc').value;
-    const statusEl = document.getElementById('help-status');
-
-    const { data: { user } } = await supabase.auth.getUser();
-
-    // Simulate sending to Telegram Bot and saving to DB
-    const ticketData = {
-      title,
-      category,
-      description: desc,
-      userId: user?.id || 'anonymous',
-      userEmail: user?.email || 'anonymous',
-      createdAt: new Date().toISOString()
+if (chatMessages && chatForm) {
+    loadMessages();
+    supabase.channel('public:messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, loadMessages).subscribe();
+    chatForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const text = messageInput.value.trim();
+        if (!text) return;
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return window.location.href = '/login.html';
+        await supabase.from('messages').insert({ sender_id: user.id, receiver_id: activeChatId, text });
+        messageInput.value = '';
     };
-
-    console.log('Ticket Submitted:', ticketData);
-
-    if (statusEl) {
-      statusEl.textContent = '✓ Ticket submitted successfully! It has been sent to our Telegram support.';
-      statusEl.style.color = '#000';
-      statusEl.style.display = 'block';
-    }
-
-    helpForm.reset();
-  });
 }
 
-// Report Form Logic
-const reportForm = document.getElementById('report-form');
-if (reportForm) {
-  reportForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const handle = document.getElementById('report-handle').value;
-    const reason = document.getElementById('report-reason').value;
-    const statusEl = document.getElementById('report-status');
-
-    console.log('Report Submitted:', { handle, reason });
-
-    if (statusEl) {
-      statusEl.textContent = '✓ Report submitted. Our team will review it shortly.';
-      statusEl.style.color = '#ff4444';
-      statusEl.style.display = 'block';
-    }
-
-    reportForm.reset();
-  });
-}
-
-// Username Search and Personal Chat Logic
-const userSearchInput = document.getElementById('user-search-input');
-const searchOverlay = document.getElementById('search-results-overlay');
-const contactList = document.getElementById('contact-list');
-
-if (userSearchInput && searchOverlay) {
-  userSearchInput.addEventListener('input', async (e) => {
-    const queryStr = e.target.value.trim().toLowerCase();
-    if (queryStr.length < 3) {
-      searchOverlay.style.display = 'none';
-      return;
-    }
-
-    // Simulation of searching users in Supabase profiles
-    const users = [
-      { id: '1', username: 'vinit_raj', full_name: 'Vinit Raj' },
-      { id: '2', username: 'jules_ai', full_name: 'Jules AI' },
-      { id: '3', username: 'alex_chat', full_name: 'Alex' },
-    ].filter(u => u.username.includes(queryStr.replace('@', '')));
-
-    searchOverlay.innerHTML = '';
-    if (users.length > 0) {
-      users.forEach(u => {
-        const div = document.createElement('div');
-        div.className = 'search-result-item';
-        div.innerHTML = `
-          <div class="contact-avatar">${u.full_name.charAt(0)}</div>
-          <div class="contact-info">
-            <div class="contact-name">${u.full_name}</div>
-            <div class="contact-last-msg">@${u.username}</div>
-          </div>
-        `;
-        div.onclick = () => {
-          startPersonalChat(u);
-          searchOverlay.style.display = 'none';
-          userSearchInput.value = '';
-        };
-        searchOverlay.appendChild(div);
-      });
-      searchOverlay.style.display = 'block';
-    } else {
-      searchOverlay.style.display = 'none';
-    }
-  });
-}
-
-function startPersonalChat(user) {
-  if (!contactList) return;
-
-  // Check if contact already exists
-  const existing = Array.from(contactList.querySelectorAll('.contact-name'))
-    .find(el => el.textContent === user.full_name);
-
-  if (existing) {
-    existing.closest('.contact-item').click();
-    return;
-  }
-
-  // Add new contact item
-  const contactItem = document.createElement('div');
-  contactItem.className = 'contact-item';
-  contactItem.innerHTML = `
-    <div class="contact-avatar">${user.full_name.charAt(0)}</div>
-    <div class="contact-info">
-      <div class="contact-name">${user.full_name}</div>
-      <div class="contact-last-msg">Start chatting with @${user.username}</div>
-    </div>
-  `;
-
-  contactItem.onclick = () => {
-    document.querySelectorAll('.contact-item').forEach(i => i.classList.remove('active'));
-    contactItem.classList.add('active');
-
-    const chatTitle = document.querySelector('.chat-main .contact-name');
-    if (chatTitle) chatTitle.textContent = user.full_name;
-
-    const chatMessages = document.getElementById('chat-messages');
-    if (chatMessages) {
-      chatMessages.innerHTML = `
-        <div class="message received">
-          Hi! This is the start of your personal chat with ${user.full_name}.
-          <span class="message-time">Just now</span>
-        </div>
-      `;
-    }
-
-    if (window.innerWidth <= 768) {
-      document.getElementById('sidebar').classList.remove('open');
-      hideNavs();
-    }
-  };
-
-  contactList.prepend(contactItem);
-  contactItem.click();
-}
-
-// AI Assistant Logic (Simulation)
-const aiForm = document.getElementById('ai-form');
-const aiMessages = document.getElementById('ai-messages');
-const aiInput = document.getElementById('ai-input');
-const aiTyping = document.getElementById('ai-typing');
-
+// --- AI Logic ---
+const aiForm = document.getElementById('ai-form'), aiMessages = document.getElementById('ai-messages'), aiInput = document.getElementById('ai-input'), aiTyping = document.getElementById('ai-typing');
 if (aiForm && aiMessages) {
-  aiForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const text = aiInput.value.trim();
-    if (!text) return;
+    aiForm.onsubmit = (e) => {
+        e.preventDefault();
+        const text = aiInput.value.trim();
+        if (!text) return;
+        aiMessages.append(createEl('div', { className: 'message sent', textContent: text }));
+        aiInput.value = '';
+        if (aiTyping) aiTyping.style.display = 'block';
+        setTimeout(() => {
+            if (aiTyping) aiTyping.style.display = 'none';
+            aiMessages.append(createEl('div', { className: 'message received', textContent: `Zyno AI: I've received your message "${text}". This is a simulation.` }));
+            aiMessages.scrollTop = aiMessages.scrollHeight;
+        }, 1500);
+    };
+}
 
-    // Add user message
-    const userMsg = document.createElement('div');
-    userMsg.className = 'ai-bubble user';
-    userMsg.textContent = text;
-    aiMessages.appendChild(userMsg);
-    aiInput.value = '';
-    aiMessages.scrollTop = aiMessages.scrollHeight;
+// --- Auth State & Profile ---
+supabase.auth.onAuthStateChange(async (event, session) => {
+    const user = session?.user, dp = document.getElementById('user-dp'), path = window.location.pathname;
+    if (user) {
+        if (dp) dp.textContent = (user.user_metadata?.full_name || user.email)[0].toUpperCase();
+        const pName = document.getElementById('profile-name'), pHandle = document.getElementById('profile-handle'), dpLarge = document.getElementById('user-dp-large');
+        const name = user.user_metadata?.full_name || user.email.split('@')[0];
+        if (pName) pName.textContent = name;
+        if (pHandle) pHandle.textContent = `@${user.email.split('@')[0]}`;
+        if (dpLarge) dpLarge.textContent = name[0].toUpperCase();
+        if (path.includes('login.html')) window.location.href = '/index.html';
+    } else if (['chat.html', 'profile.html', 'settings.html', 'admin.html', 'ai-chat.html'].some(p => path.includes(p))) {
+        window.location.href = '/login.html';
+    }
+});
 
-    // Show typing indicator
-    if (aiTyping) aiTyping.style.display = 'block';
+const logoutBtn = document.getElementById('logout-btn-settings');
+if (logoutBtn) logoutBtn.onclick = async () => { await supabase.auth.signOut(); window.location.href = '/login.html'; };
 
-    // Simulate OpenRouter API call
-    setTimeout(() => {
-      if (aiTyping) aiTyping.style.display = 'none';
+// --- Sidebar Navigation ---
+const globalLounge = document.querySelector('.contact-list .search-item');
+if (globalLounge) {
+    globalLounge.onclick = () => {
+        activeChatId = null;
+        document.getElementById('chat-with-name').textContent = "Global Lounge";
+        document.getElementById('chat-with-avatar').textContent = "G";
+        document.getElementById('chat-with-status').textContent = "Community";
+        loadMessages();
+    };
+}
 
-      const botMsg = document.createElement('div');
-      botMsg.className = 'ai-bubble bot';
-      botMsg.textContent = `As your Zyno AI, I've processed your request: "${text}". Currently, I'm in simulation mode. In production, I will connect via OpenRouter API.`;
-      aiMessages.appendChild(botMsg);
-      aiMessages.scrollTop = aiMessages.scrollHeight;
-    }, 1500);
-  });
+// --- Search ---
+const searchInput = document.getElementById('user-search-input'), searchOverlay = document.getElementById('search-results-overlay');
+if (searchInput && searchOverlay) {
+    searchInput.oninput = async (e) => {
+        const val = e.target.value.trim();
+        if (val.length < 2) return searchOverlay.style.display = 'none';
+        const { data } = await supabase.from('profiles').select('*').ilike('username', `%${val}%`).limit(5);
+        if (data?.length) {
+            searchOverlay.replaceChildren();
+            searchOverlay.style.display = 'block';
+            data.forEach(p => {
+                const item = createEl('div', { className: 'search-item' }, [
+                    createEl('div', { className: 'profile-box', style: 'width: 32px; height: 32px;', textContent: (p.full_name || 'U')[0] }),
+                    createEl('div', { style: 'font-size: 14px; font-weight: 600;', textContent: p.full_name || p.username })
+                ]);
+                item.onclick = () => { activeChatId = p.id; document.getElementById('chat-with-name').textContent = p.full_name || p.username; document.getElementById('chat-with-avatar').textContent = (p.full_name || p.username)[0]; document.getElementById('chat-with-status').textContent = `@${p.username}`; loadMessages(); searchOverlay.style.display = 'none'; searchInput.value = ''; };
+                searchOverlay.append(item);
+            });
+        }
+    };
 }
