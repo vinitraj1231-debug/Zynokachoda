@@ -1,0 +1,4 @@
+## 2026-05-09 - [HIGH] Sensitive File Exposure and Insecure CORS
+**Vulnerability:** The Express server was publicly serving sensitive files including `SUPABASE_SETUP.sql` (revealing database schema) and various server log files. Additionally, the CORS configuration enabled `credentials: true` while using a wildcard `origin: '*'`, which is insecure and causes modern browsers to block responses.
+**Learning:** Middleware for blocking sensitive files must be explicitly updated whenever new sensitive assets (like setup scripts or logs) are added to the root directory, as the default static server may expose them.
+**Prevention:** Regularly audit the `sensitiveFiles` block-list in `server.js` and ensure CORS policies use specific origins when credentials are required, or disable credentials for wildcard origins.
