@@ -140,38 +140,116 @@ button, input, textarea { font: inherit; background: none; border: none; outline
 
 .nav-item.active { color: var(--accent); }
 
-/* ── Chat Layout ────────────────────────────────────────────── */
+/* ── Chat Layout (WhatsApp Pro Style) ───────────────────────── */
+.chat-page-body { overflow: hidden; height: 100vh; }
+
 .chat-container {
   display: flex;
   height: 100vh;
   padding-top: var(--nav-h);
+  background: var(--bg-0);
 }
 
 .chat-sidebar {
-  width: 360px;
+  width: 380px;
   background: var(--bg-1);
   border-right: 1px solid var(--border-1);
   display: flex;
   flex-direction: column;
-  transition: transform 0.4s var(--ease);
+  z-index: 800;
 }
+
+.sidebar-header {
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar-search-container {
+  padding: 0 24px 16px;
+  position: relative;
+}
+
+.search-input-wrapper {
+  background: var(--bg-2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border: 1px solid var(--border-1);
+}
+
+.search-input-wrapper input {
+  flex: 1;
+  padding: 12px 0;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+.search-results-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 24px;
+  right: 24px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 12px;
+  z-index: 1000;
+  box-shadow: var(--shadow-l);
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.contact-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.contact-item {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  border-left: 4px solid transparent;
+}
+
+.contact-item:hover { background: var(--bg-card); }
+.contact-item.active {
+  background: var(--accent-dim);
+  border-left-color: var(--accent-hot);
+}
+
+.contact-info { flex: 1; min-width: 0; }
+.contact-name-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.contact-name { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.contact-time { font-size: 11px; color: var(--text-3); }
+.contact-last-msg { font-size: 13px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .chat-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: var(--bg-0);
-  position: relative;
+  background: #050505;
+  background-image: radial-gradient(circle at 50% 50%, rgba(124, 92, 252, 0.03) 0%, transparent 100%);
 }
 
 .chat-header {
   height: 72px;
   padding: 0 24px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border-1);
   display: flex;
   align-items: center;
-  background: var(--bg-0);
+  justify-content: space-between;
 }
+
+.chat-header-info { display: flex; align-items: center; gap: 14px; }
+.chat-name { font-weight: 700; font-size: 16px; }
+.chat-status { font-size: 12px; color: var(--accent-hot); }
 
 .chat-messages {
   flex: 1;
@@ -179,89 +257,82 @@ button, input, textarea { font: inherit; background: none; border: none; outline
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-bottom: 180px; /* Crucial: Space for input + bottom nav */
+  gap: 8px;
+  background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); /* WhatsApp Dark Pattern */
+  background-opacity: 0.05;
 }
 
-/* ── Chat Input (Advanced) ──────────────────────────────────── */
-.chat-input-area {
-  position: absolute;
-  bottom: 100px; /* Positioned above bottom nav */
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(95%, 800px);
-  z-index: 100;
+.chat-input-container {
+  padding: 20px 24px 100px; /* Bottom padding for nav */
 }
 
-/* Desktop Sidebar Tweaks */
-@media (min-width: 1024px) {
-    .chat-sidebar {
-        width: 400px;
-    }
-}
-
-.input-form {
-  background: var(--bg-glass);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border-2);
-  border-radius: 20px;
-  padding: 10px 10px 10px 20px;
+.chat-input-bar {
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: 16px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: var(--shadow-l);
 }
 
-.message-input { flex: 1; font-size: 15px; }
+.chat-input-bar input {
+  flex: 1;
+  padding: 10px;
+  font-size: 15px;
+}
 
-.btn-send {
+.btn-send-circle {
   width: 44px; height: 44px;
-  border-radius: 14px;
-  background: var(--accent);
-  color: var(--bg-0);
+  background: var(--accent-hot);
+  color: #fff;
+  border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  transition: 0.2s;
+  box-shadow: 0 4px 12px rgba(124, 92, 252, 0.3);
 }
 
-.btn-send:hover { background: #eee; transform: scale(1.05); }
-
-/* ── Message Bubbles ────────────────────────────────────────── */
+/* ── Advanced Bubbles ────────────────────────────────────────── */
 .message {
-  max-width: 80%;
-  padding: 14px 18px;
-  border-radius: 20px;
+  max-width: 70%;
+  padding: 10px 14px;
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 1.4;
   position: relative;
-  animation: slideUp 0.3s var(--ease);
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .message.sent {
   align-self: flex-end;
-  background: var(--accent);
-  color: #000;
-  border-bottom-right-radius: 4px;
+  background: #056162; /* WhatsApp Dark Green */
+  color: #e9edef;
+  border-radius: 12px 0 12px 12px;
 }
 
 .message.received {
   align-self: flex-start;
-  background: var(--bg-card);
-  border: 1px solid var(--border-1);
-  border-bottom-left-radius: 4px;
+  background: #202c33; /* WhatsApp Dark Grey */
+  color: #e9edef;
+  border-radius: 0 12px 12px 12px;
 }
 
 .message-time {
-  display: block;
+  float: right;
   font-size: 10px;
-  margin-top: 6px;
+  margin-top: 4px;
+  margin-left: 8px;
   opacity: 0.6;
 }
+
+.icon-btn {
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text-2);
+  transition: 0.2s;
+}
+
+.icon-btn:hover { background: var(--bg-card); color: var(--accent); }
 
 /* ── Auth Page ──────────────────────────────────────────────── */
 .auth-page {

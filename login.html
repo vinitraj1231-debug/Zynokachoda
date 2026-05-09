@@ -14,16 +14,17 @@
         <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2C5.58 2 2 5.58 2 10c0 1.85.6 3.56 1.6 4.95L2.05 17.5a.5.5 0 00.63.63l2.55-1.55A7.96 7.96 0 0010 18c4.42 0 8-3.58 8-8s-3.58-8-8-8zm-3 6h6a.5.5 0 010 1H7a.5.5 0 010-1zm0 2.5h4a.5.5 0 010 1H7a.5.5 0 010-1z"/></svg>
         <span>Zyno</span>
       </a>
-      <h2 id="auth-title" style="font-family: 'Syne'; font-size: 24px; font-weight: 800;">Welcome Back</h2>
-      <p id="auth-subtitle" style="color: var(--text-3); font-size: 14px;">Secure access to your messages</p>
+      <h2 id="auth-title" style="font-family: 'Syne'; font-size: 24px; font-weight: 800;">Welcome to Zyno</h2>
+      <p id="auth-subtitle" style="color: var(--text-3); font-size: 14px;">Sign in with your email to continue</p>
     </div>
 
+    <!-- Email Phase -->
     <form id="login-form">
-      <input type="email" id="email" class="auth-input" placeholder="Email Address" required>
-      <input type="password" id="password" class="auth-input" placeholder="Password" required>
-      <button type="submit" class="btn-auth">Continue</button>
+      <input type="email" id="email" class="auth-input" placeholder="Enter your email" required>
+      <button type="submit" class="btn-auth" id="login-btn">Send OTP Code</button>
     </form>
 
+    <!-- OTP Phase -->
     <form id="otp-form" style="display: none;">
       <div style="text-align: center; margin-bottom: 24px;">
         <h3 style="font-family: 'Syne'; font-size: 20px;">Verify Identity</h3>
@@ -31,22 +32,20 @@
       </div>
       <input type="text" id="otp-input" class="auth-input" placeholder="000000" maxlength="6" style="text-align: center; font-size: 24px; letter-spacing: 4px; font-weight: 700;" required>
       <button type="submit" class="btn-auth">Verify & Sign In</button>
+      <div style="text-align: center; margin-top: 16px;">
+        <a href="#" id="back-to-login" style="color: var(--text-3); font-size: 13px;">Use a different email</a>
+      </div>
     </form>
 
-    <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;">
+    <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;" id="social-auth">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+        <div style="flex: 1; height: 1px; background: var(--border-1);"></div>
+        <span style="font-size: 12px; color: var(--text-3);">OR</span>
+        <div style="flex: 1; height: 1px; background: var(--border-1);"></div>
+      </div>
       <button id="google-login" class="glass-panel" style="width: 100%; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; font-weight: 600; cursor: pointer;">
         Continue with Google
       </button>
-      <button id="github-login" class="glass-panel" style="width: 100%; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; font-weight: 600; cursor: pointer;">
-        Continue with GitHub
-      </button>
-    </div>
-
-    <div style="text-align: center; margin-top: 24px;">
-      <p style="font-size: 14px; color: var(--text-3);">
-        <span id="toggle-text">Don't have an account?</span>
-        <a href="#" id="toggle-auth" style="color: var(--accent); font-weight: 700; margin-left: 4px;">Sign up</a>
-      </p>
     </div>
   </div>
 

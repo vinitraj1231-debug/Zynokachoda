@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="styles.css" />
   <script src="seo-config.js"></script>
 </head>
-<body>
+<body class="chat-page-body">
 
 <header class="app-header">
   <div class="header-inner">
@@ -30,46 +30,65 @@
 
 <div class="chat-container">
   <aside class="chat-sidebar" id="sidebar">
-    <div class="sidebar-search-container">
-        <input type="text" id="user-search-input" class="auth-input" placeholder="Search users..." style="margin-bottom: 0;">
-        <div id="search-results-overlay" class="search-results" style="display: none;"></div>
+    <div class="sidebar-header">
+      <h2 style="font-family: 'Syne'; font-size: 20px;">Chats</h2>
+      <div class="sidebar-actions">
+        <button class="icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+      </div>
     </div>
+
+    <div class="sidebar-search-container">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="user-search-input" placeholder="Search by username..." autocomplete="off">
+        </div>
+        <div id="search-results-overlay" class="search-results-dropdown" style="display: none;"></div>
+    </div>
+
     <div class="contact-list" id="contact-list">
-      <div class="search-item active">
-        <div class="profile-box" style="width: 40px; height: 40px;">G</div>
+      <div class="contact-item active" id="global-lounge-item">
+        <div class="profile-box" style="width: 48px; height: 48px; background: var(--accent-hot);">G</div>
         <div class="contact-info">
-          <div style="font-weight: 600;">Global Lounge</div>
-          <div style="font-size: 12px; color: var(--text-3);">Community Chat</div>
+          <div class="contact-name-row">
+            <span class="contact-name">Global Lounge</span>
+            <span class="contact-time">Live</span>
+          </div>
+          <div class="contact-last-msg">Chat with everyone...</div>
         </div>
       </div>
+      <!-- Contacts will be injected here -->
     </div>
   </aside>
 
   <main class="chat-main">
     <header class="chat-header">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <div class="profile-box" style="width: 40px; height: 40px;" id="chat-with-avatar">G</div>
-        <div>
-          <div id="chat-with-name" style="font-weight: 700;">Global Lounge</div>
-          <div id="chat-with-status" style="font-size: 12px; color: var(--text-3);">Community</div>
+      <div class="chat-header-info">
+        <div class="profile-box" style="width: 44px; height: 44px;" id="chat-with-avatar">G</div>
+        <div class="chat-header-text">
+          <div id="chat-with-name" class="chat-name">Global Lounge</div>
+          <div id="chat-with-status" class="chat-status">Community</div>
         </div>
+      </div>
+      <div class="chat-header-actions">
+        <button class="icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>
+        <button class="icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></button>
       </div>
     </header>
 
     <div class="chat-messages" id="chat-messages">
-      <div class="message received">
-        Welcome to the Global Lounge! Start chatting with other Zynochat users.
-        <span class="message-time">System</span>
-      </div>
+      <!-- Messages injected by app.js -->
     </div>
 
-    <div class="chat-input-area">
-      <form class="input-form" id="chat-form">
-        <input type="text" id="message-input" class="message-input" placeholder="Type a message..." autocomplete="off">
-        <button type="submit" class="btn-send">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-        </button>
-      </form>
+    <div class="chat-input-container">
+      <div class="chat-input-bar">
+        <button class="icon-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg></button>
+        <form id="chat-form" style="flex: 1; display: flex; gap: 10px;">
+          <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off">
+          <button type="submit" class="btn-send-circle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          </button>
+        </form>
+      </div>
     </div>
   </main>
 </div>
@@ -99,7 +118,6 @@
 
 <script src="app.js" type="module"></script>
 <script>
-    // Simple Sidebar Toggle for Mobile
     const toggle = document.getElementById('sidebar-toggle-mobile');
     const sidebar = document.getElementById('sidebar');
     if (toggle && sidebar) {

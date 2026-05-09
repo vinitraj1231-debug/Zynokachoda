@@ -16,46 +16,61 @@ const createEl = (tag, props = {}, children = []) => {
 // --- Auth Handling ---
 const loginForm = document.getElementById('login-form');
 const otpForm = document.getElementById('otp-form');
-const toggleAuth = document.getElementById('toggle-auth');
-const authTitle = document.getElementById('auth-title');
-const toggleText = document.getElementById('toggle-text');
-let isSignUp = false, userEmail = '';
-
-if (toggleAuth) {
-    toggleAuth.onclick = (e) => {
-        e.preventDefault();
-        isSignUp = !isSignUp;
-        if (authTitle) authTitle.textContent = isSignUp ? "Create Account" : "Welcome Back";
-        if (toggleText) toggleText.textContent = isSignUp ? "Already have an account?" : "Don't have an account?";
-        toggleAuth.textContent = isSignUp ? "Sign in" : "Sign up";
-        if (loginForm) loginForm.querySelector('button').textContent = isSignUp ? "Create Account" : "Continue";
-    };
-}
+const backToLogin = document.getElementById('back-to-login');
+let userEmail = '';
 
 if (loginForm) {
     loginForm.onsubmit = async (e) => {
         e.preventDefault();
-        const email = document.getElementById('email').value, password = document.getElementById('password').value;
+        const email = document.getElementById('email').value;
         userEmail = email;
-        const { error } = isSignUp ? await supabase.auth.signUp({ email, password, options: { data: { full_name: email.split('@')[0] } } }) : await supabase.auth.signInWithPassword({ email, password });
-        if (error) alert(error.message);
-        else if (isSignUp) { loginForm.style.display = 'none'; if (otpForm) otpForm.style.display = 'block'; }
-        else window.location.href = '/index.html';
+
+        const { error } = await supabase.auth.signInWithOtp({
+            email,
+            options: {
+                emailRedirectTo: window.location.origin,
+            }
+        });
+
+        if (error) {
+            alert(error.message);
+        } else {
+            loginForm.style.display = 'none';
+            if (document.getElementById('social-auth')) document.getElementById('social-auth').style.display = 'none';
+            if (otpForm) otpForm.style.display = 'block';
+            if (document.getElementById('auth-subtitle')) document.getElementById('auth-subtitle').textContent = `OTP sent to ${email}`;
+        }
     };
 }
 
 if (otpForm) {
     otpForm.onsubmit = async (e) => {
         e.preventDefault();
-        const { error } = await supabase.auth.verifyOtp({ email: userEmail, token: document.getElementById('otp-input').value, type: 'signup' });
-        if (error) alert(error.message); else window.location.href = '/index.html';
+        const token = document.getElementById('otp-input').value;
+        const { error } = await supabase.auth.verifyOtp({
+            email: userEmail,
+            token,
+            type: 'email'
+        });
+
+        if (error) alert(error.message);
+        else window.location.href = '/index.html';
+    };
+}
+
+if (backToLogin) {
+    backToLogin.onclick = (e) => {
+        e.preventDefault();
+        otpForm.style.display = 'none';
+        loginForm.style.display = 'block';
+        if (document.getElementById('social-auth')) document.getElementById('social-auth').style.display = 'block';
+        if (document.getElementById('auth-subtitle')) document.getElementById('auth-subtitle').textContent = 'Sign in with your email to continue';
     };
 }
 
 // OAuth Buttons
-const googleBtn = document.getElementById('google-login'), githubBtn = document.getElementById('github-login');
+const googleBtn = document.getElementById('google-login');
 if (googleBtn) googleBtn.onclick = () => supabase.auth.signInWithOAuth({ provider: 'google' });
-if (githubBtn) githubBtn.onclick = () => supabase.auth.signInWithOAuth({ provider: 'github' });
 
 // --- Chat Logic ---
 const chatForm = document.getElementById('chat-form'), chatMessages = document.getElementById('chat-messages'), messageInput = document.getElementById('message-input');
@@ -64,15 +79,24 @@ let activeChatId = null;
 async function loadMessages() {
     if (!chatMessages) return;
     const { data: { user } } = await supabase.auth.getUser();
-    let query = supabase.from('messages').select('*, sender:profiles(full_name, avatar_url)').order('created_at', { ascending: true });
-    query = activeChatId ? query.or(`and(sender_id.eq.${activeChatId},receiver_id.eq.${user.id}),and(sender_id.eq.${user.id},receiver_id.eq.${activeChatId})`) : query.is('receiver_id', null);
+    if (!user) return;
+
+    let query = supabase.from('messages').select('*, sender:profiles(full_name, avatar_url, username)').order('created_at', { ascending: true });
+
+    if (activeChatId) {
+        query = query.or(`and(sender_id.eq.${activeChatId},receiver_id.eq.${user.id}),and(sender_id.eq.${user.id},receiver_id.eq.${activeChatId})`);
+    } else {
+        query = query.is('receiver_id', null);
+    }
+
     const { data, error } = await query;
     if (error) return console.error(error);
+
     chatMessages.replaceChildren();
     data.forEach(msg => {
-        const isMe = msg.sender_id === user?.id;
+        const isMe = msg.sender_id === user.id;
         const div = createEl('div', { className: `message ${isMe ? 'sent' : 'received'}` }, [
-            createEl('div', { style: "font-size: 11px; opacity: 0.6; margin-bottom: 4px;", textContent: isMe ? 'You' : (msg.sender?.full_name || 'User') }),
+            createEl('div', { style: "font-size: 11px; opacity: 0.6; margin-bottom: 4px;", textContent: isMe ? 'You' : (msg.sender?.full_name || msg.sender?.username || 'User') }),
             createEl('div', { textContent: msg.text }),
             createEl('span', { className: 'message-time', textContent: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })
         ]);
@@ -84,13 +108,19 @@ async function loadMessages() {
 if (chatMessages && chatForm) {
     loadMessages();
     supabase.channel('public:messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, loadMessages).subscribe();
+
     chatForm.onsubmit = async (e) => {
         e.preventDefault();
         const text = messageInput.value.trim();
         if (!text) return;
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return window.location.href = '/login.html';
-        await supabase.from('messages').insert({ sender_id: user.id, receiver_id: activeChatId, text });
+
+        await supabase.from('messages').insert({
+            sender_id: user.id,
+            receiver_id: activeChatId,
+            text
+        });
         messageInput.value = '';
     };
 }
@@ -133,35 +163,104 @@ const logoutBtn = document.getElementById('logout-btn-settings');
 if (logoutBtn) logoutBtn.onclick = async () => { await supabase.auth.signOut(); window.location.href = '/login.html'; };
 
 // --- Sidebar Navigation ---
-const globalLounge = document.querySelector('.contact-list .search-item');
+const globalLounge = document.getElementById('global-lounge-item');
 if (globalLounge) {
     globalLounge.onclick = () => {
         activeChatId = null;
         document.getElementById('chat-with-name').textContent = "Global Lounge";
         document.getElementById('chat-with-avatar').textContent = "G";
         document.getElementById('chat-with-status').textContent = "Community";
+        document.querySelectorAll('.contact-item').forEach(i => i.classList.remove('active'));
+        globalLounge.classList.add('active');
         loadMessages();
     };
 }
 
-// --- Search ---
+// --- Search & New Chat ---
 const searchInput = document.getElementById('user-search-input'), searchOverlay = document.getElementById('search-results-overlay');
 if (searchInput && searchOverlay) {
     searchInput.oninput = async (e) => {
         const val = e.target.value.trim();
-        if (val.length < 2) return searchOverlay.style.display = 'none';
-        const { data } = await supabase.from('profiles').select('*').ilike('username', `%${val}%`).limit(5);
+        if (val.length < 2) {
+            searchOverlay.style.display = 'none';
+            return;
+        }
+
+        const { data: { user } } = await supabase.auth.getUser();
+        const { data } = await supabase.from('profiles')
+            .select('*')
+            .neq('id', user?.id)
+            .or(`username.ilike.%${val}%,full_name.ilike.%${val}%`)
+            .limit(5);
+
         if (data?.length) {
             searchOverlay.replaceChildren();
             searchOverlay.style.display = 'block';
             data.forEach(p => {
-                const item = createEl('div', { className: 'search-item' }, [
-                    createEl('div', { className: 'profile-box', style: 'width: 32px; height: 32px;', textContent: (p.full_name || 'U')[0] }),
-                    createEl('div', { style: 'font-size: 14px; font-weight: 600;', textContent: p.full_name || p.username })
+                const item = createEl('div', { className: 'contact-item', style: 'padding: 10px 16px; border: none;' }, [
+                    createEl('div', { className: 'profile-box', style: 'width: 36px; height: 36px;', textContent: (p.full_name || p.username || 'U')[0] }),
+                    createEl('div', { className: 'contact-info' }, [
+                        createEl('div', { style: 'font-size: 14px; font-weight: 600;', textContent: p.full_name || p.username }),
+                        createEl('div', { style: 'font-size: 11px; color: var(--text-3);', textContent: `@${p.username}` })
+                    ])
                 ]);
-                item.onclick = () => { activeChatId = p.id; document.getElementById('chat-with-name').textContent = p.full_name || p.username; document.getElementById('chat-with-avatar').textContent = (p.full_name || p.username)[0]; document.getElementById('chat-with-status').textContent = `@${p.username}`; loadMessages(); searchOverlay.style.display = 'none'; searchInput.value = ''; };
+                item.onclick = () => {
+                    startPrivateChat(p);
+                    searchOverlay.style.display = 'none';
+                    searchInput.value = '';
+                };
                 searchOverlay.append(item);
             });
+        } else {
+            searchOverlay.style.display = 'none';
         }
     };
+}
+
+// Close search overlay when clicking outside
+document.addEventListener('click', (e) => {
+    if (searchOverlay && !searchInput.contains(e.target) && !searchOverlay.contains(e.target)) {
+        searchOverlay.style.display = 'none';
+    }
+});
+
+function startPrivateChat(profile) {
+    activeChatId = profile.id;
+    document.getElementById('chat-with-name').textContent = profile.full_name || profile.username;
+    document.getElementById('chat-with-avatar').textContent = (profile.full_name || profile.username)[0];
+    document.getElementById('chat-with-status').textContent = `@${profile.username}`;
+
+    // Update sidebar UI
+    document.querySelectorAll('.contact-item').forEach(i => i.classList.remove('active'));
+
+    // Check if user already in sidebar, if not add them
+    let existing = document.querySelector(`.contact-item[data-id="${profile.id}"]`);
+    if (!existing) {
+        const contactList = document.getElementById('contact-list');
+        const newItem = createEl('div', { className: 'contact-item active' }, [
+            createEl('div', { className: 'profile-box', style: 'width: 48px; height: 48px;', textContent: (profile.full_name || profile.username)[0] }),
+            createEl('div', { className: 'contact-info' }, [
+                createEl('div', { className: 'contact-name-row' }, [
+                    createEl('span', { className: 'contact-name', textContent: profile.full_name || profile.username }),
+                    createEl('span', { className: 'contact-time', textContent: 'Now' })
+                ]),
+                createEl('div', { className: 'contact-last-msg', textContent: `@${profile.username}` })
+            ])
+        ]);
+        newItem.setAttribute('data-id', profile.id);
+        newItem.onclick = () => {
+            activeChatId = profile.id;
+            document.getElementById('chat-with-name').textContent = profile.full_name || profile.username;
+            document.getElementById('chat-with-avatar').textContent = (profile.full_name || profile.username)[0];
+            document.getElementById('chat-with-status').textContent = `@${profile.username}`;
+            document.querySelectorAll('.contact-item').forEach(i => i.classList.remove('active'));
+            newItem.classList.add('active');
+            loadMessages();
+        };
+        contactList.append(newItem);
+    } else {
+        existing.classList.add('active');
+    }
+
+    loadMessages();
 }
