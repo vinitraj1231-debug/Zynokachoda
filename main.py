@@ -18,18 +18,20 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # 2. Security Middleware
 class SecurityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Block sensitive files
+        # Block sensitive files and directories
         path = request.url.path.lower()
-        sensitive_files = [
-            'package.json', 'package-lock.json', 'server.js',
-            'render.yaml', '.gitignore', 'readme.md',
-            'supabase_setup.sql', 'requirements.txt', 'main.py'
-        ]
+        forbidden_files = {
+            'package.json', 'package-lock.json', 'server.js', 'render.yaml',
+            'requirements.txt', 'main.py', 'supabase_setup.sql', 'server.log',
+            'server_output.log', 'server_test.log'
+        }
+        forbidden_extensions = {'.py', '.sql', '.log', '.env', '.yaml', '.yml', '.md'}
 
         segments = [s for s in path.split('/') if s]
-        if segments:
-            filename = segments[-1]
-            if filename in sensitive_files or filename.startswith('.'):
+        for segment in segments:
+            if (segment in forbidden_files or
+                segment.startswith('.') or
+                any(segment.endswith(ext) for ext in forbidden_extensions)):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)
@@ -38,6 +40,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
