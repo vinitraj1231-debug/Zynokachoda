@@ -4,7 +4,13 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const SUPABASE_URL = 'YOUR_SUPABASE_URL';
 const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase;
+try {
+    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (e) {
+    console.error("Supabase client failed to initialize:", e);
+    // Fallback or mock if needed for UI testing, but normally we need a real client
+}
 
 // --- Helper: Safe DOM creation ---
 const createEl = (tag, props = {}, children = []) => {
@@ -147,13 +153,57 @@ if (aiForm && aiMessages) {
 supabase.auth.onAuthStateChange(async (event, session) => {
     const user = session?.user, dp = document.getElementById('user-dp'), path = window.location.pathname;
     if (user) {
-        if (dp) dp.textContent = (user.user_metadata?.full_name || user.email)[0].toUpperCase();
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        const displayName = profile?.full_name || user.user_metadata?.full_name || user.email.split('@')[0];
+        const displayUsername = profile?.username || user.email.split('@')[0];
+
+        if (dp) dp.textContent = displayName[0].toUpperCase();
         const pName = document.getElementById('profile-name'), pHandle = document.getElementById('profile-handle'), dpLarge = document.getElementById('user-dp-large');
-        const name = user.user_metadata?.full_name || user.email.split('@')[0];
-        if (pName) pName.textContent = name;
-        if (pHandle) pHandle.textContent = `@${user.email.split('@')[0]}`;
-        if (dpLarge) dpLarge.textContent = name[0].toUpperCase();
+        if (pName) pName.textContent = displayName;
+        if (pHandle) pHandle.textContent = `@${displayUsername}`;
+        if (dpLarge) dpLarge.textContent = displayName[0].toUpperCase();
         if (path.includes('login.html')) window.location.href = '/index.html';
+
+        // Force username if it looks like an email or is missing (new users)
+        if (!profile?.username && !path.includes('profile.html')) {
+             // Optional: Redirect to profile to set username if needed
+             // window.location.href = '/profile.html';
+        }
+
+        // Profile Editing Logic
+        const editBtn = document.getElementById('edit-profile-btn'), editForm = document.getElementById('edit-profile-form'), viewDiv = document.getElementById('profile-view');
+        if (editBtn && editForm && viewDiv) {
+            editBtn.onclick = () => {
+                viewDiv.style.display = 'none';
+                editForm.style.display = 'grid';
+                document.getElementById('edit-fullname').value = displayName;
+                document.getElementById('edit-username').value = displayUsername;
+            };
+            document.getElementById('cancel-edit-btn').onclick = () => {
+                viewDiv.style.display = 'grid';
+                editForm.style.display = 'none';
+            };
+            editForm.onsubmit = async (e) => {
+                e.preventDefault();
+                const newName = document.getElementById('edit-fullname').value.trim();
+                const newUser = document.getElementById('edit-username').value.trim();
+                const errEl = document.getElementById('username-error');
+                errEl.style.display = 'none';
+
+                const { error } = await supabase.from('profiles').update({
+                    full_name: newName,
+                    username: newUser,
+                    updated_at: new Date().toISOString()
+                }).eq('id', user.id);
+
+                if (error) {
+                    if (error.code === '23505') errEl.style.display = 'block';
+                    else alert(error.message);
+                } else {
+                    location.reload();
+                }
+            };
+        }
     } else if (['chat.html', 'profile.html', 'settings.html', 'admin.html', 'ai-chat.html'].some(p => path.includes(p))) {
         window.location.href = '/login.html';
     }
@@ -172,7 +222,27 @@ if (globalLounge) {
         document.getElementById('chat-with-status').textContent = "Community";
         document.querySelectorAll('.contact-item').forEach(i => i.classList.remove('active'));
         globalLounge.classList.add('active');
+        if (window.innerWidth <= 768) {
+            const sidebar = document.getElementById('sidebar');
+            const chatWindow = document.getElementById('chat-window');
+            if (sidebar) sidebar.classList.add('closed');
+            if (chatWindow) {
+                chatWindow.classList.remove('hidden');
+                chatWindow.classList.add('active'); // Added to ensure visibility for playwright
+            }
+        }
         loadMessages();
+    };
+}
+
+// Mobile Back Button
+const backBtn = document.getElementById('back-to-contacts');
+if (backBtn) {
+    backBtn.onclick = () => {
+        const sidebar = document.getElementById('sidebar');
+        const chatWindow = document.getElementById('chat-window');
+        if (sidebar) sidebar.classList.remove('closed');
+        if (chatWindow) chatWindow.classList.add('hidden');
     };
 }
 
@@ -229,6 +299,12 @@ function startPrivateChat(profile) {
     document.getElementById('chat-with-name').textContent = profile.full_name || profile.username;
     document.getElementById('chat-with-avatar').textContent = (profile.full_name || profile.username)[0];
     document.getElementById('chat-with-status').textContent = `@${profile.username}`;
+
+    // Mobile UI handling
+    if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.add('closed');
+        document.getElementById('chat-window').classList.remove('hidden');
+    }
 
     // Update sidebar UI
     document.querySelectorAll('.contact-item').forEach(i => i.classList.remove('active'));
