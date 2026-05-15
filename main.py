@@ -15,21 +15,22 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+SENSITIVE_FILES = {
+    'package.json', 'package-lock.json', 'server.js',
+    'render.yaml', '.gitignore', 'readme.md',
+    'supabase_setup.sql', 'requirements.txt', 'main.py',
+    'server.log', 'server_output.log', 'server_test.log'
+}
+
 # 2. Security Middleware
 class SecurityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Block sensitive files
+        # Block sensitive files and hidden directories
         path = request.url.path.lower()
-        sensitive_files = [
-            'package.json', 'package-lock.json', 'server.js',
-            'render.yaml', '.gitignore', 'readme.md',
-            'supabase_setup.sql', 'requirements.txt', 'main.py'
-        ]
-
         segments = [s for s in path.split('/') if s]
-        if segments:
-            filename = segments[-1]
-            if filename in sensitive_files or filename.startswith('.'):
+
+        for segment in segments:
+            if segment in SENSITIVE_FILES or segment.startswith('.'):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)

@@ -1,0 +1,4 @@
+## 2026-05-15 - [CRITICAL] Path Traversal via Partial Path Verification
+**Vulnerability:** The `SecurityMiddleware` only verified the final segment (filename) of the request path. This allowed attackers to access hidden files or directories by nesting them in subdirectories (e.g., `/.git/config` was blocked but `/.testdir/vulnerable.txt` was accessible if the last segment wasn't explicitly blacklisted).
+**Learning:** Checking only the final segment of a URI is insufficient for preventing information leakage in static file servers. Path-based security logic must account for the entire path hierarchy.
+**Prevention:** Implement recursive or iterative path segment validation. Use `path.split('/')` to inspect every directory and file name in the requested path for sensitive prefixes (like `.`) or blacklisted filenames.
