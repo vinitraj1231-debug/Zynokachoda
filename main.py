@@ -27,9 +27,8 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         ]
 
         segments = [s for s in path.split('/') if s]
-        if segments:
-            filename = segments[-1]
-            if filename in sensitive_files or filename.startswith('.'):
+        for segment in segments:
+            if segment in sensitive_files or segment.startswith('.'):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)
