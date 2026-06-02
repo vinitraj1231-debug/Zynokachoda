@@ -29,16 +29,19 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
         segments = [s for s in path.split('/') if s]
         for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
+            if segment in sensitive_files or segment.startswith('.') or segment.endswith('.log'):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)
 
         # Security Headers
         response.headers["X-Content-Type-Options"] = "nosniff"
+        # X-Frame-Options is for older browsers, CSP frame-ancestors is for modern ones
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; "
@@ -47,6 +50,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com; "
             "object-src 'none'; "
+            "frame-ancestors 'none'; "
             "upgrade-insecure-requests;"
         )
         return response
