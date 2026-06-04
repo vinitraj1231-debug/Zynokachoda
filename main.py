@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -18,18 +18,27 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # 2. Security Middleware
 class SecurityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Block sensitive files
         path = request.url.path.lower()
-        sensitive_files = [
-            'package.json', 'package-lock.json', 'server.js',
-            'render.yaml', '.gitignore', 'readme.md',
-            'supabase_setup.sql', 'requirements.txt', 'main.py',
-            'server.log', 'server_output.log', 'server_test.log'
-        ]
+
+        # Redirect .html to clean paths (prevent rate-limit bypass)
+        if path.endswith(".html") and path != "/404.html":
+            # Sanitize path to prevent open redirect (e.g. //attacker.com)
+            clean_path = "/" + path.lstrip("/").removesuffix(".html")
+            if clean_path == "/index":
+                clean_path = "/"
+            return RedirectResponse(url=clean_path, status_code=301)
+
+        # Block sensitive files and extensions
+        sensitive_files = {
+            'package.json', 'package-lock.json', 'server.js', 'render.yaml',
+            '.gitignore', 'readme.md', 'supabase_setup.sql', 'requirements.txt',
+            'main.py', 'server.log', 'server_output.log', 'server_test.log'
+        }
+        sensitive_exts = ('.py', '.sql', '.yaml', '.log', '.sh', '.env', '.lock')
 
         segments = [s for s in path.split('/') if s]
         for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
+            if segment in sensitive_files or segment.startswith('.') or segment.endswith(sensitive_exts):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)
