@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -20,16 +20,21 @@ class SecurityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Block sensitive files
         path = request.url.path.lower()
-        sensitive_files = [
-            'package.json', 'package-lock.json', 'server.js',
-            'render.yaml', '.gitignore', 'readme.md',
-            'supabase_setup.sql', 'requirements.txt', 'main.py',
-            'server.log', 'server_output.log', 'server_test.log'
-        ]
+
+        # Enforce clean URLs
+        if path.endswith('.html'):
+            if path == '/index.html':
+                clean_path = '/'
+            else:
+                clean_path = path[:-5]
+            return RedirectResponse(url=clean_path, status_code=301)
+
+        sensitive_files = ['package.json', 'package-lock.json', 'render.yaml', 'supabase_setup.sql', 'requirements.txt', 'server.js', '.gitignore']
+        blocked_extensions = ('.py', '.sql', '.yaml', '.log', '.sh', '.env', '.lock', '.md')
 
         segments = [s for s in path.split('/') if s]
         for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
+            if segment in sensitive_files or segment.startswith('.') or segment.endswith(blocked_extensions):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)
@@ -39,6 +44,8 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; "
@@ -66,6 +73,7 @@ async def chat_page(request: Request):
     return FileResponse("chat.html")
 
 @app.get("/admin")
+@limiter.limit("5/minute")
 async def admin_page(request: Request):
     return FileResponse("admin.html")
 
