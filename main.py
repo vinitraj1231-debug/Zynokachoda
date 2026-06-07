@@ -26,10 +26,13 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             'supabase_setup.sql', 'requirements.txt', 'main.py',
             'server.log', 'server_output.log', 'server_test.log'
         ]
+        sensitive_extensions = ('.py', '.sql', '.yaml', '.log', '.sh', '.env', '.lock')
 
         segments = [s for s in path.split('/') if s]
         for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
+            if (segment in sensitive_files or
+                segment.startswith('.') or
+                segment.endswith(sensitive_extensions)):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)
@@ -49,6 +52,8 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             "object-src 'none'; "
             "upgrade-insecure-requests;"
         )
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         return response
 
 app.add_middleware(SecurityMiddleware)
