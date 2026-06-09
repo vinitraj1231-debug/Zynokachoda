@@ -28,8 +28,9 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         ]
 
         segments = [s for s in path.split('/') if s]
+        forbidden_extensions = ('.py', '.sql', '.yaml', '.log', '.env')
         for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
+            if segment in sensitive_files or segment.startswith('.') or segment.endswith(forbidden_extensions):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)
