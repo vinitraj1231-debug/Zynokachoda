@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -18,18 +18,28 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # 2. Security Middleware
 class SecurityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Block sensitive files
+        # Block sensitive files and extensions
         path = request.url.path.lower()
-        sensitive_files = [
+        sensitive_files = {
             'package.json', 'package-lock.json', 'server.js',
             'render.yaml', '.gitignore', 'readme.md',
             'supabase_setup.sql', 'requirements.txt', 'main.py',
             'server.log', 'server_output.log', 'server_test.log'
-        ]
+        }
+        sensitive_extensions = {'.py', '.sql', '.env', '.yaml', '.log'}
+
+        # Redirect .html to clean paths (e.g. /login.html -> /login)
+        if path.endswith('.html'):
+            clean_path = path.rsplit('.html', 1)[0]
+            path_segments = clean_path.split('/')
+            if path_segments and path_segments[-1] == 'index':
+                clean_path = '/'.join(path_segments[:-1]) or '/'
+            return RedirectResponse(url=clean_path, status_code=301)
 
         segments = [s for s in path.split('/') if s]
         for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
+            if segment in sensitive_files or segment.startswith('.') or \
+               any(segment.endswith(ext) for ext in sensitive_extensions):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)
