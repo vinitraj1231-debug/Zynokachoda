@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="styles.css" />
   <script src="seo-config.js"></script>
 </head>
-<body class="chat-page-body">
+<body class="chat-page-body mobile-chat-view">
 
 <header class="app-header">
   <div class="header-inner">
@@ -60,9 +60,12 @@
     </div>
   </aside>
 
-  <main class="chat-main">
+  <main class="chat-main hidden" id="chat-window">
     <header class="chat-header">
       <div class="chat-header-info">
+        <button id="back-to-contacts" class="icon-btn mobile-only" style="margin-right: 8px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
         <div class="profile-box" style="width: 44px; height: 44px;" id="chat-with-avatar">G</div>
         <div class="chat-header-text">
           <div id="chat-with-name" class="chat-name">Global Lounge</div>
@@ -117,12 +120,5 @@
 </nav>
 
 <script src="app.js" type="module"></script>
-<script>
-    const toggle = document.getElementById('sidebar-toggle-mobile');
-    const sidebar = document.getElementById('sidebar');
-    if (toggle && sidebar) {
-        toggle.onclick = () => sidebar.classList.toggle('open');
-    }
-</script>
 </body>
 </html>

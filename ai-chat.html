@@ -24,7 +24,7 @@
   </div>
 </header>
 
-<main class="chat-main" style="height: 100vh; padding-top: var(--nav-h);">
+<main class="chat-main">
     <div class="chat-messages" id="ai-messages">
         <div class="message received">
             Hello! I am your Zyno AI Assistant. I can help you navigate the platform, answer questions about Zynochat, or just chat!
@@ -32,12 +32,12 @@
         </div>
     </div>
 
-    <div id="ai-typing" style="padding: 0 24px; font-size: 12px; color: var(--text-3); display: none; margin-bottom: 120px;">Zyno is thinking...</div>
+    <div id="ai-typing" style="padding: 0 24px; font-size: 12px; color: var(--text-3); display: none;">Zyno is thinking...</div>
 
-    <div class="chat-input-area" style="bottom: 100px;">
-      <form class="input-form" id="ai-form">
-        <input type="text" id="ai-input" class="message-input" placeholder="Ask AI anything..." autocomplete="off">
-        <button type="submit" class="btn-send">
+    <div class="chat-input-container">
+      <form class="chat-input-bar" id="ai-form">
+        <input type="text" id="ai-input" placeholder="Ask AI anything..." autocomplete="off">
+        <button type="submit" class="btn-send-circle">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
         </button>
       </form>
