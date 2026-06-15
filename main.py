@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -31,6 +31,18 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         for segment in segments:
             if segment in sensitive_files or segment.startswith('.'):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
+
+        # Enforce clean URLs to prevent rate-limit bypass
+        if path.endswith(".html"):
+            new_path = path[:-5]
+            if new_path.endswith("/index"):
+                new_path = new_path[:-6]
+            if not new_path:
+                new_path = "/"
+
+            query = request.url.query
+            url = new_path + (f"?{query}" if query else "")
+            return RedirectResponse(url=url, status_code=301)
 
         response = await call_next(request)
 
