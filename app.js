@@ -4,7 +4,21 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const SUPABASE_URL = 'YOUR_SUPABASE_URL';
 const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase;
+try {
+    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (e) {
+    console.error("Supabase initialization failed:", e);
+    // Proxy-based dummy client to prevent downstream crashes from placeholder keys
+    const dummy = new Proxy(() => dummy, {
+        get: (t, p) => {
+            if (p === 'onAuthStateChange') return () => ({ data: { subscription: { unsubscribe: () => {} } } });
+            if (p === 'getUser') return async () => ({ data: { user: null } });
+            return p === 'then' ? undefined : dummy;
+        }
+    });
+    supabase = dummy;
+}
 
 // --- Helper: Safe DOM creation ---
 const createEl = (tag, props = {}, children = []) => {
