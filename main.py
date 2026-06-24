@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -16,39 +16,51 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # 2. Security Middleware
+SENSITIVE_FILES = {
+    'package.json', 'package-lock.json', 'server.js', 'render.yaml',
+    '.gitignore', 'readme.md', 'supabase_setup.sql', 'requirements.txt',
+    'main.py', 'server.log', 'server_output.log', 'server_test.log'
+}
+FORBIDDEN_EXTENSIONS = {'.py', '.sql', '.env', '.yaml', '.log'}
+
 class SecurityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Block sensitive files
         path = request.url.path.lower()
-        sensitive_files = [
-            'package.json', 'package-lock.json', 'server.js',
-            'render.yaml', '.gitignore', 'readme.md',
-            'supabase_setup.sql', 'requirements.txt', 'main.py',
-            'server.log', 'server_output.log', 'server_test.log'
-        ]
 
+        # 1. Clean URL Redirection
+        if path.endswith(".html"):
+            clean_path = path[:-5]
+            if clean_path == "/index": clean_path = "/"
+            query = request.url.query
+            return RedirectResponse(url=f"{clean_path}?{query}" if query else clean_path, status_code=307)
+
+        # 2. Path Segment Blocking
         segments = [s for s in path.split('/') if s]
         for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
+            if segment in SENSITIVE_FILES or segment.startswith('.') or \
+               any(segment.endswith(ext) for ext in FORBIDDEN_EXTENSIONS):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)
 
-        # Security Headers
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; "
-            "connect-src 'self' https://*.supabase.co wss://*.supabase.co; "
-            "img-src 'self' data: https://*.supabase.co https://zynochat.in https://user-images.githubusercontent.com; "
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-            "font-src 'self' https://fonts.gstatic.com; "
-            "object-src 'none'; "
-            "upgrade-insecure-requests;"
-        )
+        # 3. Security Headers
+        response.headers.update({
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY",
+            "X-XSS-Protection": "1; mode=block",
+            "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+            "Referrer-Policy": "strict-origin-when-cross-origin",
+            "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+            "Content-Security-Policy": (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; "
+                "connect-src 'self' https://*.supabase.co wss://*.supabase.co; "
+                "img-src 'self' data: https://*.supabase.co https://zynochat.in https://user-images.githubusercontent.com; "
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                "font-src 'self' https://fonts.gstatic.com; "
+                "object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests;"
+            )
+        })
         return response
 
 app.add_middleware(SecurityMiddleware)
@@ -62,20 +74,49 @@ async def login_page(request: Request):
     return FileResponse("login.html")
 
 @app.get("/chat")
+@limiter.limit("20/minute")
 async def chat_page(request: Request):
     return FileResponse("chat.html")
 
 @app.get("/admin")
+@limiter.limit("10/minute")
 async def admin_page(request: Request):
     return FileResponse("admin.html")
 
 @app.get("/profile")
+@limiter.limit("20/minute")
 async def profile_page(request: Request):
     return FileResponse("profile.html")
 
 @app.get("/settings")
+@limiter.limit("20/minute")
 async def settings_page(request: Request):
     return FileResponse("settings.html")
+
+@app.get("/ai-chat")
+@limiter.limit("20/minute")
+async def ai_chat_page(request: Request):
+    return FileResponse("ai-chat.html")
+
+@app.get("/about")
+async def about_page(request: Request):
+    return FileResponse("about.html")
+
+@app.get("/features")
+async def features_page(request: Request):
+    return FileResponse("features.html")
+
+@app.get("/contact")
+async def contact_page(request: Request):
+    return FileResponse("contact.html")
+
+@app.get("/privacy-policy")
+async def privacy_policy_page(request: Request):
+    return FileResponse("privacy-policy.html")
+
+@app.get("/terms-and-conditions")
+async def terms_conditions_page(request: Request):
+    return FileResponse("terms-and-conditions.html")
 
 # Root
 @app.get("/")
