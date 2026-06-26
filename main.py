@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -16,21 +16,39 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # 2. Security Middleware
+SENSITIVE_FILES = {
+    'package.json', 'package-lock.json', 'server.js',
+    'render.yaml', '.gitignore', 'readme.md',
+    'supabase_setup.sql', 'requirements.txt', 'main.py',
+    'server.log', 'server_output.log', 'server_test.log'
+}
+FORBIDDEN_EXTENSIONS = ('.py', '.sql', '.env', '.yaml', '.log')
+
 class SecurityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Block sensitive files
         path = request.url.path.lower()
-        sensitive_files = [
-            'package.json', 'package-lock.json', 'server.js',
-            'render.yaml', '.gitignore', 'readme.md',
-            'supabase_setup.sql', 'requirements.txt', 'main.py',
-            'server.log', 'server_output.log', 'server_test.log'
-        ]
+        query = request.url.query
 
+        # 1. Block forbidden extensions
+        if path.endswith(FORBIDDEN_EXTENSIONS):
+            return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
+
+        # 2. Block sensitive files and hidden directories
         segments = [s for s in path.split('/') if s]
         for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
+            if segment in SENSITIVE_FILES or segment.startswith('.'):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
+
+        # 3. Enforce Clean URLs (Redirect .html to clean path to ensure rate limits are hit)
+        if path.endswith(".html"):
+            clean_path = path[:-5]
+            if clean_path == "/index":
+                clean_path = "/"
+
+            redirect_url = clean_path
+            if query:
+                redirect_url += f"?{query}"
+            return RedirectResponse(url=redirect_url, status_code=307)
 
         response = await call_next(request)
 
@@ -62,18 +80,22 @@ async def login_page(request: Request):
     return FileResponse("login.html")
 
 @app.get("/chat")
+@limiter.limit("20/minute")
 async def chat_page(request: Request):
     return FileResponse("chat.html")
 
 @app.get("/admin")
+@limiter.limit("10/minute")
 async def admin_page(request: Request):
     return FileResponse("admin.html")
 
 @app.get("/profile")
+@limiter.limit("20/minute")
 async def profile_page(request: Request):
     return FileResponse("profile.html")
 
 @app.get("/settings")
+@limiter.limit("20/minute")
 async def settings_page(request: Request):
     return FileResponse("settings.html")
 
