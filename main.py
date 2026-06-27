@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -18,27 +18,44 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # 2. Security Middleware
 class SecurityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Block sensitive files
         path = request.url.path.lower()
-        sensitive_files = [
+
+        # 1. Clean URL Redirection (Prevent rate limit bypass via .html)
+        if path.endswith('.html'):
+            clean_path = path[:-5]
+            if clean_path == '/index':
+                clean_path = '/'
+            # Preserve query parameters
+            query = request.url.query
+            if query:
+                clean_path += f"?{query}"
+            return RedirectResponse(url=clean_path, status_code=307)
+
+        # 2. Block sensitive files and extensions
+        sensitive_files = {
             'package.json', 'package-lock.json', 'server.js',
             'render.yaml', '.gitignore', 'readme.md',
             'supabase_setup.sql', 'requirements.txt', 'main.py',
             'server.log', 'server_output.log', 'server_test.log'
-        ]
+        }
+        forbidden_extensions = {'.py', '.sql', '.env', '.yaml', '.log'}
 
         segments = [s for s in path.split('/') if s]
         for segment in segments:
             if segment in sensitive_files or segment.startswith('.'):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
+            if any(segment.endswith(ext) for ext in forbidden_extensions):
+                return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)
 
-        # Security Headers
+        # 3. Security Headers
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; "
