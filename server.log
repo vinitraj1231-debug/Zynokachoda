@@ -1,1 +1,14 @@
-Server is running securely on http://localhost:3000
+INFO:     Started server process [40029]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:3000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:59454 - "GET /login.html HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:59454 - "GET /login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59470 - "GET /app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59454 - "GET /styles.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59454 - "GET /index.html HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:59454 - "GET / HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40029]
