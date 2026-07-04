@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -32,13 +32,23 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             if segment in sensitive_files or segment.startswith('.'):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
+        # Enforce clean URLs to prevent rate-limit bypass
+        if path.endswith(".html"):
+            clean_path = "/" if path == "/index.html" else path.removesuffix(".html")
+            url = clean_path
+            if request.url.query:
+                url += f"?{request.url.query}"
+            return RedirectResponse(url=url, status_code=307)
+
         response = await call_next(request)
 
         # Security Headers
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; "
@@ -47,6 +57,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com; "
             "object-src 'none'; "
+            "frame-ancestors 'none'; "
             "upgrade-insecure-requests;"
         )
         return response
