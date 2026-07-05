@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -18,27 +18,49 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # 2. Security Middleware
 class SecurityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Block sensitive files
         path = request.url.path.lower()
-        sensitive_files = [
+
+        # 1. Enforce clean URLs (redirect .html to extension-less)
+        # This prevents rate-limit bypass via direct .html access
+        if path.endswith(".html") and path != "/":
+            new_path = path.removesuffix(".html")
+            if new_path == "/index":
+                new_path = "/"
+
+            # 🛡️ Fix Open Redirect: Ensure path starts with exactly one "/"
+            # and prevent protocol-relative redirects
+            new_path = "/" + new_path.lstrip("/")
+
+            # Preserve query parameters
+            query = request.url.query
+            redirect_url = new_path + (f"?{query}" if query else "")
+            return RedirectResponse(url=redirect_url, status_code=307)
+
+        # 2. Block sensitive files and extensions
+        # Block specific sensitive filenames and dangerous extensions
+        sensitive_files = {
             'package.json', 'package-lock.json', 'server.js',
             'render.yaml', '.gitignore', 'readme.md',
-            'supabase_setup.sql', 'requirements.txt', 'main.py',
-            'server.log', 'server_output.log', 'server_test.log'
-        ]
+            'supabase_setup.sql', 'requirements.txt', 'main.py'
+        }
+        forbidden_extensions = ('.py', '.sql', '.env', '.yaml', '.log')
 
         segments = [s for s in path.split('/') if s]
         for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
+            if (segment in sensitive_files or
+                segment.startswith('.') or
+                segment.endswith(forbidden_extensions)):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)
 
-        # Security Headers
+        # 3. Security Headers
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; "
@@ -47,6 +69,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com; "
             "object-src 'none'; "
+            "frame-ancestors 'none'; "
             "upgrade-insecure-requests;"
         )
         return response
