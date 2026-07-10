@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -16,39 +16,27 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # 2. Security Middleware
+SENSITIVE = {'package.json', 'package-lock.json', 'server.js', 'render.yaml', '.gitignore', 'readme.md', 'supabase_setup.sql', 'requirements.txt', 'main.py', 'server.log', 'server_output.log', 'server_test.log'}
+FORBIDDEN_EXT = {'.py', '.sql', '.env', '.yaml', '.log'}
+
 class SecurityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Block sensitive files
         path = request.url.path.lower()
-        sensitive_files = [
-            'package.json', 'package-lock.json', 'server.js',
-            'render.yaml', '.gitignore', 'readme.md',
-            'supabase_setup.sql', 'requirements.txt', 'main.py',
-            'server.log', 'server_output.log', 'server_test.log'
-        ]
+        if path.endswith('.html') and path != '/':
+            new_path = "/" if path == "/index.html" else path.removesuffix('.html')
+            return RedirectResponse(url=f"{new_path}{'?' + request.url.query if request.url.query else ''}", status_code=307)
 
-        segments = [s for s in path.split('/') if s]
-        for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
+        for s in [s for s in path.split('/') if s]:
+            if s in SENSITIVE or s.startswith('.') or any(s.endswith(e) for e in FORBIDDEN_EXT):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)
-
-        # Security Headers
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; "
-            "connect-src 'self' https://*.supabase.co wss://*.supabase.co; "
-            "img-src 'self' data: https://*.supabase.co https://zynochat.in https://user-images.githubusercontent.com; "
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-            "font-src 'self' https://fonts.gstatic.com; "
-            "object-src 'none'; "
-            "upgrade-insecure-requests;"
-        )
+        response.headers.update({
+            "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY", "X-XSS-Protection": "1; mode=block",
+            "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+            "Referrer-Policy": "strict-origin-when-cross-origin", "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+            "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' data: https://*.supabase.co https://zynochat.in https://user-images.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests;"
+        })
         return response
 
 app.add_middleware(SecurityMiddleware)
