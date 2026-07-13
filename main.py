@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -16,25 +16,31 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # 2. Security Middleware
+FORBIDDEN_EXT = ('.py', '.sql', '.yaml', '.env', '.log')
+SENSITIVE_FILES = {
+    'package.json', 'package-lock.json', 'server.js',
+    'render.yaml', '.gitignore', 'readme.md',
+    'requirements.txt', 'main.py'
+}
+
 class SecurityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Block sensitive files
         path = request.url.path.lower()
-        sensitive_files = [
-            'package.json', 'package-lock.json', 'server.js',
-            'render.yaml', '.gitignore', 'readme.md',
-            'supabase_setup.sql', 'requirements.txt', 'main.py',
-            'server.log', 'server_output.log', 'server_test.log'
-        ]
 
-        segments = [s for s in path.split('/') if s]
-        for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
+        if path.endswith(FORBIDDEN_EXT):
+            return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
+
+        for segment in [s for s in path.split('/') if s]:
+            if segment in SENSITIVE_FILES or segment.startswith('.'):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
-        response = await call_next(request)
+        if path.endswith('.html'):
+            new_path = path.removesuffix('.html')
+            if new_path == '/index': new_path = '/'
+            query = f"?{request.url.query}" if request.url.query else ""
+            return RedirectResponse(url=f"{new_path}{query}", status_code=307)
 
-        # Security Headers
+        response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
@@ -54,8 +60,6 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 app.add_middleware(SecurityMiddleware)
 
 # 3. Static Assets
-# Mount everything except HTML files to /assets or serve directly
-# For simplicity in this structure, we serve specific pages and then mount the rest
 @app.get("/login")
 @limiter.limit("10/minute")
 async def login_page(request: Request):
@@ -77,13 +81,10 @@ async def profile_page(request: Request):
 async def settings_page(request: Request):
     return FileResponse("settings.html")
 
-# Root
 @app.get("/")
 async def root():
     return FileResponse("index.html")
 
-# Mount the current directory for other assets (js, css, etc.)
-# We use a custom StaticFiles to handle SPA-like behavior or just serve assets
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
 if __name__ == "__main__":
