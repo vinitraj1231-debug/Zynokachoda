@@ -1,1 +1,17 @@
-Server is running securely on http://localhost:3000
+INFO:     Will watch for changes in these directories: ['/app']
+INFO:     Uvicorn running on http://0.0.0.0:3000 (Press CTRL+C to quit)
+INFO:     Started reloader process [45226] using WatchFiles
+INFO:     Started server process [45664]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:37250 - "GET /login.html HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:37250 - "GET /login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37254 - "GET /app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37250 - "GET /styles.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37254 - "GET /login.html?test=123 HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:37254 - "GET /login?test=123 HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [45664]
+INFO:     Stopping reloader process [45226]
