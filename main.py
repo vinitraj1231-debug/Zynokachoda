@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -17,24 +17,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # 2. Security Middleware
 class SecurityMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        # Block sensitive files
-        path = request.url.path.lower()
-        sensitive_files = [
-            'package.json', 'package-lock.json', 'server.js',
-            'render.yaml', '.gitignore', 'readme.md',
-            'supabase_setup.sql', 'requirements.txt', 'main.py',
-            'server.log', 'server_output.log', 'server_test.log'
-        ]
-
-        segments = [s for s in path.split('/') if s]
-        for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
-                return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
-
-        response = await call_next(request)
-
-        # Security Headers
+    def add_security_headers(self, response):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
@@ -50,6 +33,44 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             "upgrade-insecure-requests;"
         )
         return response
+
+    async def dispatch(self, request: Request, call_next):
+        original_path = request.url.path
+        # Normalize leading slashes to prevent Open Redirect (protocol-relative redirect bypasses)
+        safe_path = "/" + original_path.lstrip("/")
+
+        path_lower = safe_path.lower()
+        query = f"?{request.url.query}" if request.url.query else ""
+
+        # Enforce Clean URL redirection for HTML files to prevent rate-limit bypass
+        if path_lower.endswith("/index.html"):
+            # Redirect e.g. /admin/index.html -> /admin/ (preserving casing of administrative segment)
+            parent_path = safe_path[:-10]
+            response = RedirectResponse(url=f"{parent_path}{query}", status_code=307)
+            return self.add_security_headers(response)
+        elif path_lower.endswith(".html"):
+            # Redirect e.g. /Login.html -> /Login (preserving casing)
+            clean_path = safe_path[:-5]
+            response = RedirectResponse(url=f"{clean_path}{query}", status_code=307)
+            return self.add_security_headers(response)
+
+        # Block sensitive files and case-insensitive forbidden extensions across all URL segments
+        SENSITIVE_FILES = {
+            'package.json', 'package-lock.json', 'server.js',
+            'render.yaml', '.gitignore', 'readme.md',
+            'supabase_setup.sql', 'requirements.txt', 'main.py',
+            'server.log', 'server_output.log', 'server_test.log'
+        }
+        FORBIDDEN_EXTENSIONS = ('.py', '.sql', '.yaml', '.log', '.env')
+
+        segments = [s for s in path_lower.split('/') if s]
+        for segment in segments:
+            if segment in SENSITIVE_FILES or segment.startswith('.') or any(segment.endswith(ext) for ext in FORBIDDEN_EXTENSIONS):
+                response = JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
+                return self.add_security_headers(response)
+
+        response = await call_next(request)
+        return self.add_security_headers(response)
 
 app.add_middleware(SecurityMiddleware)
 
