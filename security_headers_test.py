@@ -1,0 +1,58 @@
+import pytest
+from fastapi.testclient import TestClient
+from main import app
+
+client = TestClient(app)
+
+def test_security_headers_applied():
+    """Assert that security headers are applied to successful responses."""
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.headers.get("X-Frame-Options") == "DENY"
+    assert response.headers.get("X-Content-Type-Options") == "nosniff"
+    assert response.headers.get("X-XSS-Protection") == "1; mode=block"
+    assert "Strict-Transport-Security" in response.headers
+    assert "Content-Security-Policy" in response.headers
+
+def test_clean_urls_serving():
+    """Assert that clean extension-less URLs return 200 OK and serve expected pages."""
+    for path in ["/", "/login", "/chat", "/features", "/about", "/compare", "/contact", "/blog", "/ai-chat"]:
+        response = client.get(path)
+        assert response.status_code == 200
+        assert "text/html" in response.headers.get("content-type", "")
+
+def test_html_extension_redirection():
+    """Assert that accessing with .html triggers a 307 redirect to clean extension-less path."""
+    response = client.get("/login.html", follow_redirects=False)
+    assert response.status_code == 307
+    assert response.headers["location"] == "/login"
+
+    response_query = client.get("/features.html?ref=ai", follow_redirects=False)
+    assert response_query.status_code == 307
+    assert response_query.headers["location"] == "/features?ref=ai"
+
+def test_index_html_redirection():
+    """Assert that index.html redirects to parent root path."""
+    response = client.get("/index.html", follow_redirects=False)
+    assert response.status_code == 307
+    assert response.headers["location"] == "/"
+
+def test_sensitive_files_blocked():
+    """Assert that sensitive files are blocked with 403 Forbidden across all segments."""
+    for sensitive in ["/package.json", "/.gitignore", "/main.py", "/app.py", "/server.js"]:
+        response = client.get(sensitive)
+        assert response.status_code == 403
+        assert "Forbidden" in response.json()["detail"]
+
+def test_forbidden_extensions_blocked():
+    """Assert that any path containing blocked extensions is forbidden."""
+    for path in ["/db.sql", "/config.yaml", "/server.log", "/.env"]:
+        response = client.get(path)
+        assert response.status_code == 403
+        assert "Forbidden" in response.json()["detail"]
+
+def test_legal_pages():
+    """Assert that new legal pages are served correctly."""
+    for path in ["/privacy-policy", "/terms-and-conditions", "/disclaimer", "/cookie-policy", "/refund-policy"]:
+        response = client.get(path)
+        assert response.status_code == 200
