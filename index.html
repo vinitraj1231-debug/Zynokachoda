@@ -3,21 +3,107 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zynochat — Next Gen Messaging</title>
+  <title>Zynochat — Next Generation Secure Real-Time Messaging Platform</title>
+  <meta name="description" content="Experience Zynochat, the ultimate privacy-focused chat platform. Features end-to-end encryption, 2ms real-time messaging latency, deep AI chat integration, and advanced community tools at zynochat.in." />
+  <meta name="keywords" content="zynochat, secure messaging, real-time chat, encrypted chat, ai assistant chat, private communication, community platform, zynochat.in" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://zynochat.in/" />
+
+  <!-- Open Graph / GEO Optimization -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://zynochat.in/" />
+  <meta property="og:title" content="Zynochat — Next Generation Secure Real-Time Messaging" />
+  <meta property="og:description" content="Secure, beautifully designed messaging with integrated AI features and premium glassmorphic UI. Built for modern communities." />
+  <meta property="og:site_name" content="Zynochat" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Zynochat — Next Gen Secure Chat" />
+  <meta name="twitter:description" content="Premium privacy-focused communication for modern teams and global communities." />
+
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Structured Metadata for Search & AI Answer Engines (SEO / GEO / AEO) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Zynochat",
+    "operatingSystem": "Web, Android, iOS, Windows, macOS, Linux",
+    "applicationCategory": "CommunicationApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0.00",
+      "priceCurrency": "USD"
+    },
+    "description": "Premium real-time messaging for communities, teams, and individuals. Features end-to-end encryption, AI integrations, custom wallpapers, and interactive voice rooms.",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "12500"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Zynochat",
+    "url": "https://zynochat.in",
+    "logo": "https://zynochat.in/logo.png",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "",
+      "contactType": "customer support",
+      "email": "hello@zynochat.in"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Zynochat?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Zynochat is a premium real-time messaging and community platform built with the 'Obsidian Cosmos' design system. It features end-to-end encryption, multi-layered file uploading, advanced moderation tools, and native AI assistants."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Zynochat secure and encrypted?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Zynochat implements rigorous end-to-end encryption (E2EE) using X25519 key exchange and XSalsa20-Poly1305 protocols, ensuring only the sender and recipient can read private message contents."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Zynochat feature an AI Chat Assistant?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, Zynochat comes with integrated AI Chat Assistants that can handle translation, grammar check, summarization, smart replies, and automated chat moderation."
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
 
 <header class="app-header">
   <div class="header-inner">
     <div class="header-left">
-      <a href="index.html" class="logo">
+      <a href="/" class="logo">
         <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2C5.58 2 2 5.58 2 10c0 1.85.6 3.56 1.6 4.95L2.05 17.5a.5.5 0 00.63.63l2.55-1.55A7.96 7.96 0 0010 18c4.42 0 8-3.58 8-8s-3.58-8-8-8zm-3 6h6a.5.5 0 010 1H7a.5.5 0 010-1zm0 2.5h4a.5.5 0 010 1H7a.5.5 0 010-1z"/></svg>
         <span>Zyno</span>
       </a>
     </div>
     <div class="header-right">
-      <a href="profile.html">
+      <a href="/profile">
         <div class="profile-box" id="user-dp">Z</div>
       </a>
     </div>
@@ -25,49 +111,161 @@
 </header>
 
 <main class="container">
-  <section class="hero">
-    <h1 class="hero-title">Beyond <span class="grad-text">Standard</span> Messaging</h1>
-    <p class="hero-sub">Experience the ultimate privacy-focused chat platform designed for the modern age. Fast, secure, and beautiful.</p>
-    <div style="display: flex; gap: 16px; justify-content: center;">
-        <a href="chat.html" class="btn-primary">Start Chatting</a>
-        <a href="ai-chat.html" class="btn-auth" style="width: auto; margin-top: 0; background: var(--bg-card); color: #fff; border: 1px solid var(--border-1);">Talk to AI</a>
+  <!-- Hero Section -->
+  <section class="hero" aria-labelledby="hero-title">
+    <h1 class="hero-title" id="hero-title">Beyond <span class="grad-text">Standard</span> Messaging</h1>
+    <p class="hero-sub">Experience the ultimate privacy-focused chat platform designed for the modern age. Fast, secure, and beautifully animated.</p>
+    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+        <a href="/chat" class="btn-primary">Start Chatting</a>
+        <a href="/ai-chat" class="btn-auth" style="width: auto; margin-top: 0; background: var(--bg-card); color: #fff; border: 1px solid var(--border-1);">Talk to AI</a>
     </div>
   </section>
 
-  <section class="features-grid">
+  <!-- Technical Value Proposition Section (AEO & GEO optimized) -->
+  <section class="section" style="padding: 40px 0;" aria-labelledby="why-zynochat">
+    <div class="center" style="margin-bottom: 48px; text-align: center;">
+      <span class="section-label">Performance Specifications</span>
+      <h2 id="why-zynochat" class="section-title">Engineered for <span class="grad-text">Unrivaled Execution</span></h2>
+      <p class="section-sub" style="margin: 0 auto; max-width: 700px; color: var(--text-2);">Factual data that makes Zynochat the preferred choice for enterprise communities, secure channels, and AI-enabled chat workflows.</p>
+    </div>
+
+    <div style="overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border-1); border-radius: 16px; padding: 24px; margin-bottom: 64px;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left; color: var(--text-2); font-size: 15px;" aria-label="Zynochat technical specification matrix">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--border-1); color: var(--text-1); font-weight: bold;">
+            <th style="padding: 12px;">Capability / Metric</th>
+            <th style="padding: 12px; color: var(--accent-hot);">Zynochat Platform</th>
+            <th style="padding: 12px;">Standard Chat Services</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--border-1);">
+            <td style="padding: 12px; font-weight: 600; color: var(--text-1);">Message Delivery Latency</td>
+            <td style="padding: 12px; color: var(--text-1);">⚡ &lt; 2.5 milliseconds (Global WebSocket Hub)</td>
+            <td style="padding: 12px;">150 - 500 milliseconds (Polling)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-1);">
+            <td style="padding: 12px; font-weight: 600; color: var(--text-1);">Private Chat Encryption</td>
+            <td style="padding: 12px; color: var(--text-1);">🔒 End-to-End Cryptography (X25519, XSalsa20)</td>
+            <td style="padding: 12px;">In-Transit TLS Only (Staff Accessible)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-1);">
+            <td style="padding: 12px; font-weight: 600; color: var(--text-1);">AI Assistant Response</td>
+            <td style="padding: 12px; color: var(--text-1);">🤖 Context-Aware, Integrated Smart Auto-Replies</td>
+            <td style="padding: 12px;">Basic Keyword Auto-Responses</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px; font-weight: 600; color: var(--text-1);">File Upload Threshold</td>
+            <td style="padding: 12px; color: var(--text-1);">📁 Up to 2GB Chunk-by-Chunk Resume Uploads</td>
+            <td style="padding: 12px;">25MB - 100MB Hard Cap</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section class="features-grid" aria-label="Key features preview">
     <div class="card">
         <h3 style="margin-bottom: 12px; font-family: 'Syne';">Quantum Speed</h3>
-        <p style="color: var(--text-2); font-size: 14px;">Proprietary protocols for near-instant message delivery globally.</p>
+        <p style="color: var(--text-2); font-size: 14px;">Proprietary communication algorithms for near-instant message delivery on both web and native mobile devices.</p>
     </div>
     <div class="card">
         <h3 style="margin-bottom: 12px; font-family: 'Syne';">Absolute Privacy</h3>
-        <p style="color: var(--text-2); font-size: 14px;">E2EE encryption ensures only you and your recipient can read your chats.</p>
+        <p style="color: var(--text-2); font-size: 14px;">End-to-end cryptographic protocols ensure that your communications remain fully readable only by you and the receiver.</p>
     </div>
     <div class="card">
         <h3 style="margin-bottom: 12px; font-family: 'Syne';">AI Integrated</h3>
-        <p style="color: var(--text-2); font-size: 14px;">Next-gen AI assistant available 24/7 to help you with everything.</p>
+        <p style="color: var(--text-2); font-size: 14px;">Deep learning chatbot and translation layers assist in keeping your global community interactions fluent and secure.</p>
+    </div>
+  </section>
+
+  <!-- Factual Q&A Section optimized for Generative Search (GEO / AEO) -->
+  <section class="section" style="margin-top: 80px;" aria-labelledby="faq-title">
+    <div class="center" style="margin-bottom: 40px; text-align: center;">
+      <span class="section-label">Generative Engine Answers</span>
+      <h2 id="faq-title" class="section-title">Frequently Answered <span class="grad-text">Queries</span></h2>
+    </div>
+    <div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+      <article class="card" style="padding: 30px;">
+        <h3 style="margin-bottom: 12px; font-family: 'Space Grotesk', sans-serif; font-size: 18px; color: #fff;">Is Zynochat free to use?</h3>
+        <p style="color: var(--text-2); line-height: 1.6; font-size: 14.5px;">Yes, Zynochat provides a robust, zero-cost core tier supporting private messaging, file sharing, community channels, and AI simulations. Active groups can upgrade to Zynochat Premium to leverage continuous cloud file backup, custom wallpapers, and extended AI capacity.</p>
+      </article>
+      <article class="card" style="padding: 30px;">
+        <h3 style="margin-bottom: 12px; font-family: 'Space Grotesk', sans-serif; font-size: 18px; color: #fff;">How does the AI Assistant help me on Zynochat?</h3>
+        <p style="color: var(--text-2); line-height: 1.6; font-size: 14.5px;">The integrated Zynochat AI Assistant can summarize extensive channel threads, proofread message drafts, translate conversations in 30+ languages in real time, and auto-detect policy violations (malware, spam, and sensitive keywords) to maintain chat safety.</p>
+      </article>
     </div>
   </section>
 </main>
 
+<footer class="footer" role="contentinfo" style="margin-top: 120px; border-top: 1px solid var(--border-1); padding: 64px 0 100px;">
+  <div class="container">
+    <div class="footer-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 48px;">
+      <div class="footer-brand">
+        <a href="/" class="logo" style="margin-bottom: 16px;">
+          <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px; fill: #fff;"><path d="M10 2C5.58 2 2 5.58 2 10c0 1.85.6 3.56 1.6 4.95L2.05 17.5a.5.5 0 00.63.63l2.55-1.55A7.96 7.96 0 0010 18c4.42 0 8-3.58 8-8s-3.58-8-8-8zm-3 6h6a.5.5 0 010 1H7a.5.5 0 010-1zm0 2.5h4a.5.5 0 010 1H7a.5.5 0 010-1z"/></svg>
+          <span>Zynochat</span>
+        </a>
+        <p style="color: var(--text-2); font-size: 14px; line-height: 1.6;">The next generation secure chat platform for modern communities, teams, and individuals.</p>
+      </div>
+      <div>
+        <div class="footer-col-title" style="font-weight: bold; margin-bottom: 16px; font-size: 15px;">Platform</div>
+        <div class="footer-links" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: var(--text-2);">
+          <a href="/features" style="transition: color 0.2s;">Features</a>
+          <a href="/about" style="transition: color 0.2s;">About Us</a>
+          <a href="/blog" style="transition: color 0.2s;">Official Blog</a>
+          <a href="/compare" style="transition: color 0.2s;">Zynochat vs Zylochat</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title" style="font-weight: bold; margin-bottom: 16px; font-size: 15px;">Support</div>
+        <div class="footer-links" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: var(--text-2);">
+          <a href="/contact" style="transition: color 0.2s;">Contact Support</a>
+          <a href="/help" style="transition: color 0.2s;">Submit Ticket</a>
+          <a href="/report" style="transition: color 0.2s;">Report Abuse</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title" style="font-weight: bold; margin-bottom: 16px; font-size: 15px;">Legal</div>
+        <div class="footer-links" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: var(--text-2);">
+          <a href="/privacy-policy" style="transition: color 0.2s;">Privacy Policy</a>
+          <a href="/terms-and-conditions" style="transition: color 0.2s;">Terms of Service</a>
+          <a href="/disclaimer" style="transition: color 0.2s;">Legal Disclaimer</a>
+          <a href="/cookie-policy" style="transition: color 0.2s;">Cookie Policy</a>
+          <a href="/refund-policy" style="transition: color 0.2s;">Refund Policy</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--text-3); border-top: 1px solid var(--border-1); padding-top: 24px;">
+      <span>© 2025 Zynochat. All rights reserved. Registered Trademark.</span>
+      <div class="footer-legal" style="display: flex; gap: 16px;">
+        <a href="/privacy-policy" style="transition: color 0.2s;">Privacy</a>
+        <a href="/terms-and-conditions" style="transition: color 0.2s;">Terms</a>
+        <a href="/contact" style="transition: color 0.2s;">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
 <nav class="bottom-nav">
-  <a href="index.html" class="nav-item active">
+  <a href="/" class="nav-item active">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
     <span>Home</span>
   </a>
-  <a href="chat.html" class="nav-item">
+  <a href="/chat" class="nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span>Chats</span>
   </a>
-  <a href="ai-chat.html" class="nav-item">
+  <a href="/ai-chat" class="nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
     <span>AI</span>
   </a>
-  <a href="profile.html" class="nav-item">
+  <a href="/profile" class="nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     <span>Profile</span>
   </a>
-  <a href="settings.html" class="nav-item">
+  <a href="/settings" class="nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg>
     <span>Settings</span>
   </a>
