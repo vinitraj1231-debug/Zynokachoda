@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -18,18 +18,33 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # 2. Security Middleware
 class SecurityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Block sensitive files
-        path = request.url.path.lower()
-        sensitive_files = [
+        original_path = request.url.path
+        path_lower = original_path.lower()
+
+        # 1. Clean URL Redirection (e.g., /login.html -> /login, /index.html -> /)
+        if path_lower.endswith('/index.html'):
+            redirect_path = original_path[:-10] or "/"
+        elif path_lower.endswith('.html'):
+            redirect_path = original_path[:-5]
+        else:
+            redirect_path = None
+
+        if redirect_path is not None:
+            safe_path = '/' + redirect_path.lstrip('/\\')
+            query = f"?{request.url.query}" if request.url.query else ""
+            return RedirectResponse(url=f"{safe_path}{query}", status_code=307)
+
+        # 2. Block sensitive files & forbidden extensions
+        sensitive_files = {
             'package.json', 'package-lock.json', 'server.js',
             'render.yaml', '.gitignore', 'readme.md',
-            'supabase_setup.sql', 'requirements.txt', 'main.py',
-            'server.log', 'server_output.log', 'server_test.log'
-        ]
+            'requirements.txt'
+        }
+        forbidden_extensions = ('.py', '.sql', '.yaml', '.log', '.env')
 
-        segments = [s for s in path.split('/') if s]
+        segments = [s for s in path_lower.split('/') if s]
         for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
+            if segment in sensitive_files or segment.startswith('.') or segment.endswith(forbidden_extensions):
                 return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
 
         response = await call_next(request)
