@@ -145,7 +145,15 @@ if (aiForm && aiMessages) {
 
 // --- Auth State & Profile ---
 supabase.auth.onAuthStateChange(async (event, session) => {
-    const user = session?.user, dp = document.getElementById('user-dp'), path = window.location.pathname;
+    const user = session?.user, dp = document.getElementById('user-dp'), path = window.location.pathname.toLowerCase();
+
+    // Check if current path is login page
+    const isLoginPage = path.includes('login') || path.includes('login.html');
+
+    // Check if current path is a protected page
+    const protectedPages = ['chat', 'profile', 'settings', 'admin', 'ai-chat'];
+    const isProtectedPage = protectedPages.some(p => path.includes(p));
+
     if (user) {
         if (dp) dp.textContent = (user.user_metadata?.full_name || user.email)[0].toUpperCase();
         const pName = document.getElementById('profile-name'), pHandle = document.getElementById('profile-handle'), dpLarge = document.getElementById('user-dp-large');
@@ -153,9 +161,16 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         if (pName) pName.textContent = name;
         if (pHandle) pHandle.textContent = `@${user.email.split('@')[0]}`;
         if (dpLarge) dpLarge.textContent = name[0].toUpperCase();
-        if (path.includes('login.html')) window.location.href = '/index.html';
-    } else if (['chat.html', 'profile.html', 'settings.html', 'admin.html', 'ai-chat.html'].some(p => path.includes(p))) {
-        window.location.href = '/login.html';
+
+        // Redirect authenticated user away from login page
+        if (isLoginPage) {
+            window.location.href = '/';
+        }
+    } else {
+        // Redirect unauthenticated user to login page when attempting to access a protected page
+        if (isProtectedPage) {
+            window.location.href = '/login';
+        }
     }
 });
 
