@@ -1,1 +1,12 @@
-Server is running securely on http://localhost:3000
+INFO:     Will watch for changes in these directories: ['/app']
+INFO:     Uvicorn running on http://0.0.0.0:3000 (Press CTRL+C to quit)
+INFO:     Started reloader process [18796] using StatReload
+INFO:     Started server process [18914]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:34276 - "GET /login HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [18914]
+INFO:     Stopping reloader process [18796]
