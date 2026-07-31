@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -15,41 +15,60 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# Module-level security constants for optimal performance and centralized management
+SENSITIVE_FILES = {
+    'package.json', 'package-lock.json', 'server.js',
+    'render.yaml', '.gitignore', 'readme.md',
+    'supabase_setup.sql', 'requirements.txt'
+}
+FORBIDDEN_EXTENSIONS = ('.py', '.sql', '.yaml', '.log', '.env')
+
 # 2. Security Middleware
 class SecurityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Block sensitive files
-        path = request.url.path.lower()
-        sensitive_files = [
-            'package.json', 'package-lock.json', 'server.js',
-            'render.yaml', '.gitignore', 'readme.md',
-            'supabase_setup.sql', 'requirements.txt', 'main.py',
-            'server.log', 'server_output.log', 'server_test.log'
-        ]
+        # 1. Normalize path to prevent open redirects and other traversal/bypass vectors
+        original_path = request.url.path
+        safe_path = '/' + original_path.lstrip('/\\')
 
-        segments = [s for s in path.split('/') if s]
+        # Helper function to apply security headers to every response (defense in depth)
+        def add_security_headers(response):
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            response.headers["X-Frame-Options"] = "DENY"
+            response.headers["X-XSS-Protection"] = "1; mode=block"
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; "
+                "connect-src 'self' https://*.supabase.co wss://*.supabase.co; "
+                "img-src 'self' data: https://*.supabase.co https://zynochat.in https://user-images.githubusercontent.com; "
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                "font-src 'self' https://fonts.gstatic.com; "
+                "object-src 'none'; "
+                "upgrade-insecure-requests;"
+            )
+            return response
+
+        # 2. Block sensitive files & extensions case-insensitively across all path segments
+        segments = [s for s in safe_path.lower().split('/') if s]
         for segment in segments:
-            if segment in sensitive_files or segment.startswith('.'):
-                return JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."})
+            if segment in SENSITIVE_FILES or segment.startswith('.') or segment.endswith(FORBIDDEN_EXTENSIONS):
+                return add_security_headers(JSONResponse(status_code=403, content={"detail": "Forbidden: Access is denied."}))
 
+        # 3. Enforce clean URLs (307 redirect for .html and index.html suffixes)
+        # Suffix matching is case-insensitive, but we preserve the casing of the original path for redirection
+        safe_path_lower = safe_path.lower()
+        if safe_path_lower.endswith('/index.html'):
+            redirect_path = safe_path[:-10]
+            query = f"?{request.url.query}" if request.url.query else ""
+            return add_security_headers(RedirectResponse(url=redirect_path + query, status_code=307))
+        elif safe_path_lower.endswith('.html'):
+            redirect_path = safe_path[:-5]
+            query = f"?{request.url.query}" if request.url.query else ""
+            return add_security_headers(RedirectResponse(url=redirect_path + query, status_code=307))
+
+        # Call next middleware / route handler
         response = await call_next(request)
-
-        # Security Headers
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; "
-            "connect-src 'self' https://*.supabase.co wss://*.supabase.co; "
-            "img-src 'self' data: https://*.supabase.co https://zynochat.in https://user-images.githubusercontent.com; "
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-            "font-src 'self' https://fonts.gstatic.com; "
-            "object-src 'none'; "
-            "upgrade-insecure-requests;"
-        )
-        return response
+        return add_security_headers(response)
 
 app.add_middleware(SecurityMiddleware)
 
