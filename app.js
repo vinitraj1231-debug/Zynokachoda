@@ -660,6 +660,16 @@ if (aiForm && aiMessages) {
 // --- Auth State & Profile ---
 supabase.auth.onAuthStateChange(async (event, session) => {
     const user = session?.user, dp = document.getElementById('user-dp'), path = window.location.pathname;
+
+    // Normalize path by removing .html and trailing slashes to check clean URLs reliably
+    let cleanPath = path;
+    if (cleanPath.endsWith('.html')) {
+        cleanPath = cleanPath.slice(0, -5);
+    }
+    if (cleanPath.endsWith('/') && cleanPath.length > 1) {
+        cleanPath = cleanPath.slice(0, -1);
+    }
+
     if (user) {
         if (dp) dp.textContent = (user.user_metadata?.full_name || user.email)[0].toUpperCase();
         const pName = document.getElementById('profile-name'), pHandle = document.getElementById('profile-handle'), dpLarge = document.getElementById('user-dp-large');
@@ -667,9 +677,12 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         if (pName) pName.textContent = name;
         if (pHandle) pHandle.textContent = `@${user.email.split('@')[0]}`;
         if (dpLarge) dpLarge.textContent = name[0].toUpperCase();
-        if (path.includes('login.html')) window.location.href = '/index.html';
-    } else if (['chat.html', 'profile.html', 'settings.html', 'admin.html', 'ai-chat.html'].some(p => path.includes(p))) {
-        window.location.href = '/login.html';
+        if (cleanPath === '/login') window.location.href = '/index.html';
+    } else {
+        const protectedPaths = ['/chat', '/profile', '/settings', '/admin', '/ai-chat'];
+        if (protectedPaths.includes(cleanPath)) {
+            window.location.href = '/login.html';
+        }
     }
 });
 
