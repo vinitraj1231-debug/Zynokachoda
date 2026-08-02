@@ -8,8 +8,11 @@ def assert_security_headers(headers):
     assert headers.get("X-Content-Type-Options") == "nosniff"
     assert headers.get("X-Frame-Options") == "DENY"
     assert headers.get("X-XSS-Protection") == "1; mode=block"
+    assert headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+    assert headers.get("Permissions-Policy") == "camera=(), microphone=(), geolocation=()"
     assert "Strict-Transport-Security" in headers
-    assert "Content-Security-Policy" in headers
+    csp = headers.get("Content-Security-Policy", "")
+    assert "frame-ancestors 'none'" in csp
 
 def test_successful_route_has_security_headers():
     response = client.get("/login")
@@ -63,3 +66,14 @@ def test_open_redirect_prevention():
     assert response.status_code == 307
     # Since lstrip '/\\' turns '////attacker.com/login.html' into '/attacker.com/login.html' (which gets stripped of .html -> /attacker.com/login)
     assert response.headers["location"].startswith("/attacker.com/login")
+
+def test_rate_limits_enforced():
+    # Since we need to trigger a rate limit, we can hit a 10/minute endpoint (/login) repeatedly.
+    # Note that there might have been previous requests to /login, so we loop up to 12 times or until we get a 429.
+    triggered_429 = False
+    for _ in range(12):
+        response = client.get("/login")
+        if response.status_code == 429:
+            triggered_429 = True
+            break
+    assert triggered_429, "Expected endpoint to eventually return 429 on repeated requests"

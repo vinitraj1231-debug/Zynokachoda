@@ -39,6 +39,8 @@ def add_security_headers(response):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; "
@@ -47,6 +49,7 @@ def add_security_headers(response):
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src 'self' https://fonts.gstatic.com; "
         "object-src 'none'; "
+        "frame-ancestors 'none'; "
         "upgrade-insecure-requests;"
     )
     return response
@@ -106,6 +109,7 @@ async def login_page(request: Request):
     return FileResponse("login.html")
 
 @app.get("/chat")
+@limiter.limit("20/minute")
 async def chat_page(request: Request):
     return FileResponse("chat.html")
 
@@ -115,18 +119,22 @@ async def admin_page(request: Request):
     return FileResponse("admin.html")
 
 @app.get("/profile")
+@limiter.limit("20/minute")
 async def profile_page(request: Request):
     return FileResponse("profile.html")
 
 @app.get("/settings")
+@limiter.limit("20/minute")
 async def settings_page(request: Request):
     return FileResponse("settings.html")
 
 @app.get("/ai-chat")
+@limiter.limit("20/minute")
 async def ai_chat_page(request: Request):
     return FileResponse("ai-chat.html")
 
 @app.get("/channel")
+@limiter.limit("20/minute")
 async def channel_page(request: Request):
     return FileResponse("channel.html")
 
