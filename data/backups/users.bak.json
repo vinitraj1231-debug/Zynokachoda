@@ -1,0 +1,20 @@
+[
+  {
+    "id": "admin-id-111",
+    "username": "admin",
+    "email": "admin@zynochat.in",
+    "password": "$2b$10$roA2kGFoEjadd89nOShJe.GqKj1EapBCfM4cOdWI80kT0ynbsC//2",
+    "role": "admin",
+    "isBanned": false,
+    "createdAt": "2026-08-02T07:28:07.172Z"
+  },
+  {
+    "id": "user-id-222",
+    "username": "vinit_raj",
+    "email": "vinit@zyno.io",
+    "password": "$2b$10$roA2kGFoEjadd89nOShJe.ihrC5Tmg18LY6j9uNZv7hQm3w1TJJtG",
+    "role": "user",
+    "isBanned": false,
+    "createdAt": "2026-08-02T07:28:07.172Z"
+  }
+]

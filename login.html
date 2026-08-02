@@ -15,27 +15,27 @@
         <span>Zyno</span>
       </a>
       <h2 id="auth-title" style="font-family: 'Syne'; font-size: 24px; font-weight: 800;">Welcome to Zyno</h2>
-      <p id="auth-subtitle" style="color: var(--text-3); font-size: 14px;">Sign in with your email to continue</p>
+      <p id="auth-subtitle" style="color: var(--text-3); font-size: 14px;">Sign in with your email or username to continue</p>
     </div>
 
-    <!-- Email Phase -->
+    <!-- Secure Login / Register Form -->
     <form id="login-form">
-      <input type="email" id="email" class="auth-input" placeholder="Enter your email" required>
-      <button type="submit" class="btn-auth" id="login-btn">Send OTP Code</button>
+      <div class="form-group" style="margin-bottom: 16px;">
+        <input type="text" id="email" class="auth-input" placeholder="Enter username or email" required>
+      </div>
+      <div class="form-group" style="margin-bottom: 16px;">
+        <input type="password" id="password" class="auth-input" placeholder="Enter secure password" required>
+      </div>
+      <button type="submit" class="btn-auth" id="login-btn">Authenticate Securely</button>
     </form>
 
-    <!-- OTP Phase -->
-    <form id="otp-form" style="display: none;">
-      <div style="text-align: center; margin-bottom: 24px;">
-        <h3 style="font-family: 'Syne'; font-size: 20px;">Verify Identity</h3>
-        <p style="color: var(--text-3); font-size: 14px;">Enter the 6-digit code sent to your email</p>
-      </div>
-      <input type="text" id="otp-input" class="auth-input" placeholder="000000" maxlength="6" style="text-align: center; font-size: 24px; letter-spacing: 4px; font-weight: 700;" required>
-      <button type="submit" class="btn-auth">Verify & Sign In</button>
-      <div style="text-align: center; margin-top: 16px;">
-        <a href="#" id="back-to-login" style="color: var(--text-3); font-size: 13px;">Use a different email</a>
-      </div>
-    </form>
+    <div style="text-align: center; margin-top: 16px;">
+      <a href="#" id="toggle-flow-btn" style="color: var(--accent-hot); font-size: 13px; font-weight: 600;">Need an account? Register instead</a>
+    </div>
+
+    <div style="text-align: center; margin-top: 12px;">
+      <a href="#" id="back-to-login" style="color: var(--text-3); font-size: 13px;">Forgot password?</a>
+    </div>
 
     <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;" id="social-auth">
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
@@ -50,5 +50,32 @@
   </div>
 
 <script src="app.js" type="module"></script>
+<script>
+  const toggleBtn = document.getElementById('toggle-flow-btn');
+  const loginForm = document.getElementById('login-form');
+  const authTitle = document.getElementById('auth-title');
+  const authSubtitle = document.getElementById('auth-subtitle');
+  const loginBtn = document.getElementById('login-btn');
+
+  if (toggleBtn && loginForm) {
+    toggleBtn.onclick = (e) => {
+      e.preventDefault();
+      const isLogin = !loginForm.getAttribute('data-flow') || loginForm.getAttribute('data-flow') === 'login';
+      if (isLogin) {
+        loginForm.setAttribute('data-flow', 'register');
+        authTitle.textContent = 'Create Zyno Account';
+        authSubtitle.textContent = 'Join the highly secured real-time lounging system';
+        loginBtn.textContent = 'Create Secure Account';
+        toggleBtn.textContent = 'Already have an account? Login instead';
+      } else {
+        loginForm.setAttribute('data-flow', 'login');
+        authTitle.textContent = 'Welcome to Zyno';
+        authSubtitle.textContent = 'Sign in with your email or username to continue';
+        loginBtn.textContent = 'Authenticate Securely';
+        toggleBtn.textContent = 'Need an account? Register instead';
+      }
+    };
+  }
+</script>
 </body>
 </html>

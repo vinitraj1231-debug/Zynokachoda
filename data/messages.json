@@ -1,0 +1,16 @@
+[
+  {
+    "id": "msg-id-1",
+    "chatId": "chat-id-direct-1",
+    "senderId": "admin-id-111",
+    "text": "Hello Vinit! Welcome to Zyno Secured Chat Lounge. 🚀 Let me know if you discover any security bypasses.",
+    "createdAt": "2026-08-02T06:28:07.175Z"
+  },
+  {
+    "id": "msg-id-2",
+    "chatId": "chat-id-direct-1",
+    "senderId": "user-id-222",
+    "text": "Thanks admin! I tried running typical SQL Injection patterns on the auth forms but they were safely handled. Awesome design!",
+    "createdAt": "2026-08-02T06:58:07.175Z"
+  }
+]

@@ -1,0 +1,11 @@
+[
+  {
+    "id": "chat-id-direct-1",
+    "type": "direct",
+    "participantIds": [
+      "admin-id-111",
+      "user-id-222"
+    ],
+    "createdAt": "2026-08-02T07:28:07.174Z"
+  }
+]

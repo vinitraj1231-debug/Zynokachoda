@@ -11,29 +11,33 @@
       display: flex;
       flex-direction: column;
       gap: 24px;
+      max-width: var(--container);
+      margin: 0 auto;
     }
     .stat-cards {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
     .stat-card {
-      padding: 16px;
-      background: var(--bg-0);
+      padding: 20px;
+      background: var(--bg-1);
       border: 1px solid var(--border-1);
       border-radius: var(--radius-m);
       text-align: center;
+      box-shadow: var(--shadow-l);
     }
     .stat-val {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 800;
-      color: var(--accent-v);
+      color: var(--accent-hot);
     }
     .stat-label {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-3);
       text-transform: uppercase;
       font-weight: 700;
+      margin-top: 4px;
     }
     .admin-section {
       display: flex;
@@ -41,7 +45,7 @@
       gap: 12px;
     }
     .admin-table-wrap {
-      background: var(--bg-0);
+      background: var(--bg-1);
       border: 1px solid var(--border-1);
       border-radius: var(--radius-m);
       overflow-x: auto;
@@ -52,24 +56,51 @@
       font-size: 13px;
     }
     .admin-table th, .admin-table td {
-      padding: 12px;
+      padding: 14px;
       text-align: left;
       border-bottom: 1px solid var(--border-1);
     }
     .admin-table th {
-      background: var(--bg-1);
+      background: rgba(255, 255, 255, 0.02);
       color: var(--text-3);
       text-transform: uppercase;
       font-size: 11px;
+      letter-spacing: 0.5px;
     }
     .btn-action {
-      padding: 4px 8px;
+      padding: 6px 12px;
       font-size: 11px;
-      border-radius: 4px;
+      font-weight: 700;
+      border-radius: 6px;
       border: 1px solid var(--border-1);
       cursor: pointer;
+      transition: all 0.2s;
     }
-    .btn-ban { color: var(--text-1); border-color: var(--text-1); }
+    .btn-ban { background: #ff4444; color: #fff; border: none; }
+    .btn-ban:hover { background: #cc3333; }
+    .btn-restore { background: #00e676; color: #fff; border: none; }
+    .btn-restore:hover { background: #00b354; }
+
+    .logs-box {
+      background: var(--bg-1);
+      border: 1px solid var(--border-1);
+      border-radius: var(--radius-m);
+      padding: 16px;
+      max-height: 250px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--text-2);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .log-entry {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      padding-bottom: 4px;
+    }
+    .log-time { color: var(--accent-hot); }
+    .log-action { color: #fff; font-weight: bold; }
   </style>
 </head>
 <body class="bg-0">
@@ -77,11 +108,14 @@
 <header class="app-header">
   <div class="header-inner">
     <div class="header-left">
-      <h1 class="app-logo-text">Zyno</h1>
+      <a href="index.html" class="logo">
+        <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2C5.58 2 2 5.58 2 10c0 1.85.6 3.56 1.6 4.95L2.05 17.5a.5.5 0 00.63.63l2.55-1.55A7.96 7.96 0 0010 18c4.42 0 8-3.58 8-8s-3.58-8-8-8zm-3 6h6a.5.5 0 010 1H7a.5.5 0 010-1zm0 2.5h4a.5.5 0 010 1H7a.5.5 0 010-1z"/></svg>
+        <span>Zyno Admin</span>
+      </a>
     </div>
     <div class="header-right">
-      <a href="profile.html" class="profile-box-link" style="display: block;">
-        <div class="profile-box"></div>
+      <a href="profile.html">
+        <div class="profile-box" id="user-dp">A</div>
       </a>
     </div>
   </div>
@@ -90,36 +124,35 @@
 <main class="admin-container">
   <div class="stat-cards">
     <div class="stat-card">
-      <div class="stat-val">1.2k</div>
-      <div class="stat-label">Users</div>
+      <div class="stat-val" id="stat-users">0</div>
+      <div class="stat-label">Total Registered Users</div>
     </div>
     <div class="stat-card">
-      <div class="stat-val">45</div>
-      <div class="stat-label">Reports</div>
+      <div class="stat-val" id="stat-reports">0</div>
+      <div class="stat-label">Abuse Reports</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="stat-logs">0</div>
+      <div class="stat-label">Security Audit Trails</div>
     </div>
   </div>
 
   <div class="admin-section">
-    <h3 class="section-label">User Management</h3>
+    <h3 class="section-label" style="font-family: 'Syne'; font-size: 18px;">Dynamic User Moderation</h3>
     <div class="admin-table-wrap">
       <table class="admin-table">
         <thead>
           <tr>
-            <th>User</th>
-            <th>Status</th>
-            <th>Action</th>
+            <th>Username</th>
+            <th>Email Address</th>
+            <th>System Role</th>
+            <th>Account Status</th>
+            <th>Moderation Action</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="user-rows-container">
           <tr>
-            <td>@vinit_raj</td>
-            <td>Active</td>
-            <td><button class="btn-action btn-ban">Ban</button></td>
-          </tr>
-          <tr>
-            <td>@spammer_01</td>
-            <td>Suspended</td>
-            <td><button class="btn-action">Restore</button></td>
+            <td colspan="5" style="text-align: center; color: var(--text-3);">Loading users index...</td>
           </tr>
         </tbody>
       </table>
@@ -127,21 +160,16 @@
   </div>
 
   <div class="admin-section">
-    <h3 class="section-label">Active Banners</h3>
-    <div class="form-wrap" style="padding: 20px;">
-      <div class="form-group">
-        <label class="form-label">Banner Text/HTML</label>
-        <textarea class="form-textarea" style="min-height: 60px;">Your Ad Here</textarea>
-      </div>
-      <button class="btn btn-primary btn-sm">Update Banner</button>
+    <h3 class="section-label" style="font-family: 'Syne'; font-size: 18px;">System Security Audit Log</h3>
+    <div class="logs-box" id="audit-logs-container">
+      Loading audit logs...
     </div>
   </div>
 </main>
 
-
 <nav class="bottom-nav" id="main-bottom-nav">
   <a href="index.html" class="nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
     <span>Home</span>
   </a>
   <a href="chat.html" class="nav-item">
@@ -157,12 +185,105 @@
     <span>Profile</span>
   </a>
   <a href="settings.html" class="nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg>
     <span>Settings</span>
   </a>
 </nav>
 
 <script src="app.js" type="module"></script>
-<script src="script.js"></script>
+<script type="module">
+  import { apiCall } from './app.js';
+
+  async function loadAdminData() {
+    try {
+      const users = await apiCall('/api/admin/users');
+      const reports = await apiCall('/api/admin/reports');
+      const auditLogs = await apiCall('/api/admin/audit-logs');
+
+      // Update counters
+      document.getElementById('stat-users').textContent = users.length;
+      document.getElementById('stat-reports').textContent = reports.length;
+      document.getElementById('stat-logs').textContent = auditLogs.length;
+
+      // Populate Users list
+      const userContainer = document.getElementById('user-rows-container');
+      userContainer.replaceChildren();
+
+      users.forEach(u => {
+        const tr = document.createElement('tr');
+
+        const tdName = document.createElement('td');
+        tdName.textContent = `@${u.username}`;
+        tdName.style.fontWeight = '600';
+
+        const tdEmail = document.createElement('td');
+        tdEmail.textContent = u.email;
+
+        const tdRole = document.createElement('td');
+        tdRole.textContent = u.role.toUpperCase();
+        tdRole.style.color = u.role === 'admin' ? 'var(--accent-hot)' : 'var(--text-2)';
+
+        const tdStatus = document.createElement('td');
+        tdStatus.textContent = u.isBanned ? 'Banned' : 'Active';
+        tdStatus.style.color = u.isBanned ? '#ff4444' : '#00e676';
+        tdStatus.style.fontWeight = 'bold';
+
+        const tdAction = document.createElement('td');
+        if (u.role !== 'admin') {
+          const btn = document.createElement('button');
+          btn.className = `btn-action ${u.isBanned ? 'btn-restore' : 'btn-ban'}`;
+          btn.textContent = u.isBanned ? 'Restore Account' : 'Suspend Account';
+          btn.onclick = async () => {
+            try {
+              if (u.isBanned) {
+                await apiCall(`/api/admin/unban/${u.id}`, 'POST');
+              } else {
+                await apiCall(`/api/admin/ban/${u.id}`, 'POST');
+              }
+              loadAdminData();
+            } catch (err) {
+              alert(err.message);
+            }
+          };
+          tdAction.appendChild(btn);
+        } else {
+          tdAction.textContent = 'Protected';
+          tdAction.style.color = 'var(--text-3)';
+        }
+
+        tr.append(tdName, tdEmail, tdRole, tdStatus, tdAction);
+        userContainer.appendChild(tr);
+      });
+
+      // Populate Audit Logs
+      const logsContainer = document.getElementById('audit-logs-container');
+      logsContainer.replaceChildren();
+
+      auditLogs.forEach(log => {
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+
+        const spanTime = document.createElement('span');
+        spanTime.className = 'log-time';
+        spanTime.textContent = `[${new Date(log.timestamp).toLocaleTimeString()}] `;
+
+        const spanAction = document.createElement('span');
+        spanAction.className = 'log-action';
+        spanAction.textContent = `${log.action.toUpperCase()} `;
+
+        const textDetails = document.createTextNode(`- UserId: ${log.userId} (${JSON.stringify(log.details || {})})`);
+
+        div.append(spanTime, spanAction, textDetails);
+        logsContainer.appendChild(div);
+      });
+
+    } catch (err) {
+      console.error('Admin panel loading failure:', err);
+    }
+  }
+
+  // Load immediately when session available
+  setTimeout(loadAdminData, 600);
+</script>
 </body>
 </html>

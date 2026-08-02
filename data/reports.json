@@ -1,0 +1,9 @@
+[
+  {
+    "id": "report-id-1",
+    "reporterId": "user-id-222",
+    "reportedId": "user-id-333",
+    "reason": "User is sending malicious external phishing links inside conversation lounge.",
+    "createdAt": "2026-08-02T07:28:07.177Z"
+  }
+]
