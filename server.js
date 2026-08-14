@@ -167,8 +167,23 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
   if (!username || !email || !password) {
     return res.status(400).json({ error: 'Username, Email and Password are required.' });
   }
-  if (username.length < 3 || password.length < 6) {
-    return res.status(400).json({ error: 'Username (min 3 chars) and Password (min 6 chars) fail security guidelines.' });
+  if (typeof username !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: 'Invalid input types.' });
+  }
+  if (username.length < 3 || username.length > 30) {
+    return res.status(400).json({ error: 'Username must be between 3 and 30 characters.' });
+  }
+  if (email.length > 100) {
+    return res.status(400).json({ error: 'Email must be at most 100 characters.' });
+  }
+  if (password.length < 6 || password.length > 128) {
+    return res.status(400).json({ error: 'Password must be between 6 and 128 characters.' });
+  }
+
+  // Robust, ReDoS-safe email validation regex
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Invalid email format.' });
   }
 
   try {
@@ -198,6 +213,12 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
   const { usernameOrEmail, password } = req.body;
   if (!usernameOrEmail || !password) {
     return res.status(400).json({ error: 'Credentials are required.' });
+  }
+  if (typeof usernameOrEmail !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: 'Invalid input types.' });
+  }
+  if (usernameOrEmail.length > 100 || password.length > 128) {
+    return res.status(400).json({ error: 'Credentials exceed security limits.' });
   }
 
   try {

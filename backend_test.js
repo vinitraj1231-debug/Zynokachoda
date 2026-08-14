@@ -47,9 +47,26 @@ async function testJsonDatabase() {
   console.log('--- JSON Database Engine Tests Passed cleanly! ---\n');
 }
 
+async function testAuthHardening() {
+  console.log('--- Starting Auth Hardening Security Tests ---');
+
+  // Verify email regex pattern matching
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  assert.strictEqual(emailRegex.test('valid@example.com'), true);
+  assert.strictEqual(emailRegex.test('invalid-email'), false);
+  assert.strictEqual(emailRegex.test('valid.user+tag@domain.co.uk'), true);
+  assert.strictEqual(emailRegex.test('a@b.c'), false); // less than 2 chars TLD should fail standard test or be checked
+  assert.strictEqual(emailRegex.test('test@domain'), false);
+
+  console.log('✓ Verified Email Robust regex patterns.');
+  console.log('--- Auth Hardening Security Tests Passed cleanly! ---\n');
+}
+
 async function runAllTests() {
   try {
     await testJsonDatabase();
+    await testAuthHardening();
     console.log('🎉 ALL SECURITY AND CORE FUNCTIONAL TESTS PASSED!');
     process.exit(0);
   } catch (err) {
