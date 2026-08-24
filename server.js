@@ -164,11 +164,18 @@ function requireAdmin(req, res, next) {
 // 1. Auth: Register
 app.post('/api/auth/register', authLimiter, async (req, res) => {
   const { username, email, password } = req.body;
+  if (typeof username !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: 'Invalid input types.' });
+  }
   if (!username || !email || !password) {
     return res.status(400).json({ error: 'Username, Email and Password are required.' });
   }
-  if (username.length < 3 || password.length < 6) {
-    return res.status(400).json({ error: 'Username (min 3 chars) and Password (min 6 chars) fail security guidelines.' });
+  if (username.length < 3 || username.length > 30 || email.length > 100 || password.length < 6 || password.length > 128) {
+    return res.status(400).json({ error: 'Input lengths do not meet security criteria.' });
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Invalid email format.' });
   }
 
   try {
@@ -196,8 +203,14 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
 // 2. Auth: Login
 app.post('/api/auth/login', authLimiter, async (req, res) => {
   const { usernameOrEmail, password } = req.body;
+  if (typeof usernameOrEmail !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: 'Invalid input types.' });
+  }
   if (!usernameOrEmail || !password) {
     return res.status(400).json({ error: 'Credentials are required.' });
+  }
+  if (usernameOrEmail.length > 100 || password.length > 128) {
+    return res.status(400).json({ error: 'Credentials exceed maximum length.' });
   }
 
   try {
