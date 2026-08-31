@@ -170,6 +170,14 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
   if (username.length < 3 || password.length < 6) {
     return res.status(400).json({ error: 'Username (min 3 chars) and Password (min 6 chars) fail security guidelines.' });
   }
+  // Prevent DoS via CPU-exhaustion (e.g. extremely long passwords) and enforce strict input validation
+  if (username.length > 30 || email.length > 100 || password.length > 128) {
+    return res.status(400).json({ error: 'Username (max 30), Email (max 100), or Password (max 128) exceeds maximum allowed length.' });
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Invalid email format.' });
+  }
 
   try {
     const salt = await bcrypt.genSalt(10);
@@ -198,6 +206,10 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
   const { usernameOrEmail, password } = req.body;
   if (!usernameOrEmail || !password) {
     return res.status(400).json({ error: 'Credentials are required.' });
+  }
+  // Prevent DoS via CPU-exhaustion (e.g. extremely long passwords) and enforce input size limits
+  if (usernameOrEmail.length > 100 || password.length > 128) {
+    return res.status(400).json({ error: 'Credentials (max 100) or Password (max 128) exceeds maximum allowed length.' });
   }
 
   try {
