@@ -20,7 +20,10 @@ def test_successful_route_has_security_headers():
     assert_security_headers(response.headers)
 
 def test_sensitive_files_blocked():
-    sensitive_paths = ["/package.json", "/.gitignore", "/main.py", "/server.log", "/db/supabase_setup.sql"]
+    sensitive_paths = [
+        "/package.json", "/.gitignore", "/main.py", "/server.log", "/db/supabase_setup.sql",
+        "/db.js", "/backend_test.js", "/seed.js", "/pnpm-lock.yaml"
+    ]
     for path in sensitive_paths:
         response = client.get(path)
         assert response.status_code == 403
@@ -28,7 +31,10 @@ def test_sensitive_files_blocked():
         assert_security_headers(response.headers)
 
 def test_forbidden_extensions_blocked():
-    forbidden_paths = ["/app.py", "/data.sql", "/config.yaml", "/logs/server.log", "/auth/.env"]
+    forbidden_paths = [
+        "/app.py", "/data.sql", "/config.yaml", "/logs/server.log", "/auth/.env",
+        "/data/users.json", "/backup/users.bak"
+    ]
     for path in forbidden_paths:
         response = client.get(path)
         assert response.status_code == 403
