@@ -21,6 +21,18 @@ async function testJsonDatabase() {
     console.log('✓ Correctly caught invalid validation rules:', err.message);
   }
 
+  // 1b. Verify Group Schema Validation Exception on empty group name
+  try {
+    await db.groups.create({
+      id: 'test-invalid-group-1',
+      name: '', // invalid group name length (empty)
+      memberIds: ['user-1']
+    });
+    assert.fail('Should have failed group schema validation for empty name.');
+  } catch (err) {
+    console.log('✓ Correctly caught invalid group schema validation:', err.message);
+  }
+
   // 2. Verify Atomic Writes and Queue Locking
   const writePromises = [];
   for (let i = 0; i < 20; i++) {

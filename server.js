@@ -352,8 +352,12 @@ app.get('/api/messages/:chatId', authenticate, (req, res) => {
 // 10. Groups: Create group conversation
 app.post('/api/groups', authenticate, async (req, res) => {
   const { name, memberIds } = req.body;
-  if (!name || !Array.isArray(memberIds)) {
+  if (!name || typeof name !== 'string' || !Array.isArray(memberIds)) {
     return res.status(400).json({ error: 'Group name and initial member array required.' });
+  }
+  const trimmedName = name.trim();
+  if (trimmedName.length === 0 || trimmedName.length > 100) {
+    return res.status(400).json({ error: 'Group name must be between 1 and 100 characters.' });
   }
 
   try {
@@ -362,7 +366,7 @@ app.post('/api/groups', authenticate, async (req, res) => {
 
     const newGroup = {
       id: groupId,
-      name,
+      name: trimmedName,
       memberIds: groupMembers,
       createdAt: new Date().toISOString()
     };
