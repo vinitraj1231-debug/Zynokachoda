@@ -21,6 +21,19 @@ async function testJsonDatabase() {
     console.log('✓ Correctly caught invalid validation rules:', err.message);
   }
 
+  // 1b. Verify Schema Validation Exception on invalid report (reason too long or empty)
+  try {
+    await db.reports.create({
+      id: 'test-invalid-report',
+      reporterId: 'user1',
+      reportedId: 'user2',
+      reason: 'a'.repeat(1001) // exceeds 1000 limit
+    });
+    assert.fail('Should have failed report schema validation due to length.');
+  } catch (err) {
+    console.log('✓ Correctly caught invalid report reason length validation rule:', err.message);
+  }
+
   // 2. Verify Atomic Writes and Queue Locking
   const writePromises = [];
   for (let i = 0; i < 20; i++) {
