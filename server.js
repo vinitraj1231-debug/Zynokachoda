@@ -387,14 +387,23 @@ app.post('/api/groups', authenticate, async (req, res) => {
 // 11. Reports: File a report against spammers
 app.post('/api/reports', authenticate, async (req, res) => {
   const { reportedId, reason } = req.body;
-  if (!reportedId || !reason) return res.status(400).json({ error: 'Report params invalid.' });
+  if (typeof reportedId !== 'string' || typeof reason !== 'string') {
+    return res.status(400).json({ error: 'Report parameters invalid.' });
+  }
+  const trimmedReason = reason.trim();
+  if (!reportedId || !trimmedReason) {
+    return res.status(400).json({ error: 'Report params invalid.' });
+  }
+  if (trimmedReason.length > 1000) {
+    return res.status(400).json({ error: 'Report reason must not exceed 1000 characters.' });
+  }
 
   try {
     const newReport = {
       id: uuidv4(),
       reporterId: req.user.id,
       reportedId,
-      reason,
+      reason: trimmedReason,
       createdAt: new Date().toISOString()
     };
     await db.reports.create(newReport);

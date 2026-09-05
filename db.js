@@ -47,7 +47,8 @@ const SCHEMAS = {
   reports: {
     id: (val) => typeof val === 'string',
     reporterId: (val) => typeof val === 'string',
-    reportedId: (val) => typeof val === 'string'
+    reportedId: (val) => typeof val === 'string',
+    reason: (val) => typeof val === 'string' && val.length > 0 && val.length <= 1000
   },
   audit_logs: {
     id: (val) => typeof val === 'string',
