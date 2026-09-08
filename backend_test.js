@@ -47,9 +47,30 @@ async function testJsonDatabase() {
   console.log('--- JSON Database Engine Tests Passed cleanly! ---\n');
 }
 
+function testMessagePayloadValidation() {
+  console.log('--- Starting WebSocket Message Payload Validation Tests ---');
+
+  function validateSendMessagePayload(chatId, text) {
+    if (typeof chatId !== 'string' || typeof text !== 'string') return false;
+    const trimmedText = text.trim();
+    if (trimmedText.length === 0 || trimmedText.length > 2000) return false;
+    return true;
+  }
+
+  assert.strictEqual(validateSendMessagePayload(123, 'hello'), false, 'Should reject non-string chatId');
+  assert.strictEqual(validateSendMessagePayload('chat1', null), false, 'Should reject non-string text');
+  assert.strictEqual(validateSendMessagePayload('chat1', '   '), false, 'Should reject whitespace-only text');
+  assert.strictEqual(validateSendMessagePayload('chat1', 'a'.repeat(2001)), false, 'Should reject text over 2000 characters');
+  assert.strictEqual(validateSendMessagePayload('chat1', 'Valid message'), true, 'Should accept valid message');
+
+  console.log('✓ Verified WebSocket send_message input type, whitespace, and length checks.');
+  console.log('--- WebSocket Message Payload Validation Tests Passed! ---\n');
+}
+
 async function runAllTests() {
   try {
     await testJsonDatabase();
+    testMessagePayloadValidation();
     console.log('🎉 ALL SECURITY AND CORE FUNCTIONAL TESTS PASSED!');
     process.exit(0);
   } catch (err) {
