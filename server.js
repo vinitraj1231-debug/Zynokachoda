@@ -497,6 +497,9 @@ io.on('connection', (socket) => {
   // Real-time Messaging
   socket.on('send_message', async ({ chatId, text }) => {
     if (!authenticatedUserId) return;
+    if (typeof chatId !== 'string' || typeof text !== 'string') return;
+    const trimmedText = text.trim();
+    if (trimmedText.length === 0 || trimmedText.length > 2000) return;
 
     try {
       const chat = db.chats.queryById(chatId);
@@ -506,7 +509,7 @@ io.on('connection', (socket) => {
         id: uuidv4(),
         chatId,
         senderId: authenticatedUserId,
-        text,
+        text: trimmedText,
         createdAt: new Date().toISOString()
       };
 
