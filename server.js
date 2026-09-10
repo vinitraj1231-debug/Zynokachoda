@@ -489,8 +489,10 @@ io.on('connection', (socket) => {
   });
 
   // Typing state indicator
-  socket.on('typing_indicator', ({ recipientId, isTyping }) => {
-    if (!authenticatedUserId) return;
+  socket.on('typing_indicator', (payload) => {
+    if (!authenticatedUserId || !payload || typeof payload !== 'object') return;
+    const { recipientId, isTyping } = payload;
+    if (typeof recipientId !== 'string' || !recipientId.trim() || typeof isTyping !== 'boolean') return;
     socket.to(recipientId).emit('typing_status', { senderId: authenticatedUserId, isTyping });
   });
 
