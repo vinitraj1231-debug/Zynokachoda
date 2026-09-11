@@ -472,8 +472,12 @@ io.on('connection', (socket) => {
   let authenticatedUserId = null;
 
   // Real-time Authentication registration on websocket connect
-  socket.on('register_presence', async ({ token }) => {
+  socket.on('register_presence', async (data) => {
     try {
+      if (!data || typeof data !== 'object' || typeof data.token !== 'string') return;
+      const token = data.token.trim();
+      if (!token || token.length > 2048) return;
+
       const decoded = jwt.verify(token, JWT_SECRET);
       authenticatedUserId = decoded.userId;
       onlineUsers.set(authenticatedUserId, socket.id);
