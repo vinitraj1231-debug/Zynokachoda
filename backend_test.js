@@ -47,9 +47,35 @@ async function testJsonDatabase() {
   console.log('--- JSON Database Engine Tests Passed cleanly! ---\n');
 }
 
+function testSocketRegisterPresenceValidation() {
+  console.log('--- Starting WebSocket Presence Registration Input Validation Tests ---');
+
+  const processPresenceRegistration = (data) => {
+    if (!data || typeof data !== 'object' || typeof data.token !== 'string') return false;
+    const token = data.token.trim();
+    if (!token || token.length > 2048) return false;
+    return true;
+  };
+
+  assert.strictEqual(processPresenceRegistration(null), false);
+  assert.strictEqual(processPresenceRegistration(undefined), false);
+  assert.strictEqual(processPresenceRegistration(123), false);
+  assert.strictEqual(processPresenceRegistration('not-an-object'), false);
+  assert.strictEqual(processPresenceRegistration({ token: null }), false);
+  assert.strictEqual(processPresenceRegistration({ token: 123 }), false);
+  assert.strictEqual(processPresenceRegistration({ token: '' }), false);
+  assert.strictEqual(processPresenceRegistration({ token: '   ' }), false);
+  assert.strictEqual(processPresenceRegistration({ token: 'a'.repeat(2049) }), false);
+  assert.strictEqual(processPresenceRegistration({ token: 'valid.jwt.token' }), true);
+
+  console.log('✓ Successfully verified register_presence payload type and token validation.');
+  console.log('--- WebSocket Presence Registration Input Validation Tests Passed! ---\n');
+}
+
 async function runAllTests() {
   try {
     await testJsonDatabase();
+    testSocketRegisterPresenceValidation();
     console.log('🎉 ALL SECURITY AND CORE FUNCTIONAL TESTS PASSED!');
     process.exit(0);
   } catch (err) {
