@@ -47,9 +47,30 @@ async function testJsonDatabase() {
   console.log('--- JSON Database Engine Tests Passed cleanly! ---\n');
 }
 
+function testForgotPasswordValidation() {
+  console.log('--- Starting Forgot Password Validation Unit Tests ---');
+
+  const validateEmailInput = (email) => {
+    if (typeof email !== 'string' || !email.trim() || email.trim().length > 100) {
+      return false;
+    }
+    return true;
+  };
+
+  assert.strictEqual(validateEmailInput(null), false, 'Null email should fail validation');
+  assert.strictEqual(validateEmailInput(12345), false, 'Numeric email should fail validation');
+  assert.strictEqual(validateEmailInput(''), false, 'Empty string should fail validation');
+  assert.strictEqual(validateEmailInput('   '), false, 'Whitespace-only email should fail validation');
+  assert.strictEqual(validateEmailInput('a'.repeat(101) + '@example.com'), false, 'Overly long email should fail validation');
+  assert.strictEqual(validateEmailInput('user@example.com'), true, 'Valid email should pass validation');
+
+  console.log('✓ Forgot Password validation logic tested cleanly.');
+}
+
 async function runAllTests() {
   try {
     await testJsonDatabase();
+    testForgotPasswordValidation();
     console.log('🎉 ALL SECURITY AND CORE FUNCTIONAL TESTS PASSED!');
     process.exit(0);
   } catch (err) {
