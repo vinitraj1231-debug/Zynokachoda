@@ -285,12 +285,13 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
 // 6. Users: Search Profiles
 app.get('/api/users/search', authenticate, (req, res) => {
-  const query = (req.query.q || '').toLowerCase();
-  if (query.length < 2) return res.json([]);
+  if (typeof req.query.q !== 'string') return res.json([]);
+  const query = req.query.q.trim().toLowerCase();
+  if (query.length < 2 || query.length > 100) return res.json([]);
 
   const users = db.users.read();
   const matched = users
-    .filter(u => u.id !== req.user.id && !u.isBanned && (u.username.toLowerCase().includes(query) || u.email.toLowerCase().includes(query)))
+    .filter(u => u.id !== req.user.id && !u.isBanned && u.username.toLowerCase().includes(query))
     .map(u => ({ id: u.id, username: u.username }));
 
   res.json(matched);
