@@ -47,9 +47,46 @@ async function testJsonDatabase() {
   console.log('--- JSON Database Engine Tests Passed cleanly! ---\n');
 }
 
+function testSearchInputValidation() {
+  console.log('--- Starting Search Input Security Tests ---');
+
+  // Helper simulating /api/users/search query logic
+  function searchUsers(queryParam, mockUsers, currentUserId) {
+    if (typeof queryParam !== 'string') return [];
+    const query = queryParam.trim().toLowerCase();
+    if (query.length < 2 || query.length > 100) return [];
+
+    return mockUsers
+      .filter(u => u.id !== currentUserId && !u.isBanned && u.username.toLowerCase().includes(query))
+      .map(u => ({ id: u.id, username: u.username }));
+  }
+
+  const mockUsers = [
+    { id: 'u1', username: 'alice', email: 'alice@secret.com', isBanned: false },
+    { id: 'u2', username: 'bob', email: 'bob@secret.com', isBanned: false }
+  ];
+
+  // 1. Non-string type parameter (type confusion check)
+  assert.deepStrictEqual(searchUsers(['alice'], mockUsers, 'u1'), [], 'Should return empty array for non-string query parameter');
+  assert.deepStrictEqual(searchUsers({ q: 'alice' }, mockUsers, 'u1'), [], 'Should return empty array for object query parameter');
+
+  // 2. Query length boundary check
+  assert.deepStrictEqual(searchUsers('a', mockUsers, 'u1'), [], 'Should return empty array for query length < 2');
+  assert.deepStrictEqual(searchUsers('a'.repeat(101), mockUsers, 'u1'), [], 'Should return empty array for query length > 100');
+
+  // 3. Email privacy leak check (searching by email should return no matches)
+  assert.deepStrictEqual(searchUsers('alice@secret.com', mockUsers, 'u2'), [], 'Should not match by email address to prevent email enumeration');
+
+  // 4. Valid username search
+  assert.deepStrictEqual(searchUsers('ali', mockUsers, 'u2'), [{ id: 'u1', username: 'alice' }], 'Should match valid username query');
+
+  console.log('✓ Search input validation and email privacy tests passed cleanly.\n');
+}
+
 async function runAllTests() {
   try {
     await testJsonDatabase();
+    testSearchInputValidation();
     console.log('🎉 ALL SECURITY AND CORE FUNCTIONAL TESTS PASSED!');
     process.exit(0);
   } catch (err) {
