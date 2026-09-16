@@ -305,7 +305,16 @@ app.get('/api/chats', authenticate, (req, res) => {
 // 8. Chats: Create/Open direct conversation
 app.post('/api/chats', authenticate, async (req, res) => {
   const { type, recipientId } = req.body;
-  if (!type || !recipientId) return res.status(400).json({ error: 'Chat parameters invalid.' });
+  // Security input validation: type & recipientId must be strings
+  if (typeof type !== 'string' || typeof recipientId !== 'string' || !type || !recipientId) {
+    return res.status(400).json({ error: 'Chat parameters invalid.' });
+  }
+  if (type !== 'direct') {
+    return res.status(400).json({ error: 'Invalid chat type.' });
+  }
+  if (recipientId === req.user.id) {
+    return res.status(400).json({ error: 'Cannot create a direct chat with yourself.' });
+  }
 
   try {
     const existing = db.chats.read().find(c =>
@@ -320,6 +329,9 @@ app.post('/api/chats', authenticate, async (req, res) => {
 
     const recipient = db.users.queryById(recipientId);
     if (!recipient) return res.status(404).json({ error: 'Recipient user not found.' });
+    if (recipient.isBanned) {
+      return res.status(403).json({ error: 'Cannot start chat with a suspended account.' });
+    }
 
     const newChat = {
       id: uuidv4(),
