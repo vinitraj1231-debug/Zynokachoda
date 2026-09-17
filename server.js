@@ -472,7 +472,11 @@ io.on('connection', (socket) => {
   let authenticatedUserId = null;
 
   // Real-time Authentication registration on websocket connect
-  socket.on('register_presence', async ({ token }) => {
+  socket.on('register_presence', async (payload) => {
+    if (!payload || typeof payload !== 'object') return;
+    const { token } = payload;
+    if (typeof token !== 'string' || !token.trim() || token.length > 2048) return;
+
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
       authenticatedUserId = decoded.userId;
@@ -489,14 +493,18 @@ io.on('connection', (socket) => {
   });
 
   // Typing state indicator
-  socket.on('typing_indicator', ({ recipientId, isTyping }) => {
-    if (!authenticatedUserId) return;
+  socket.on('typing_indicator', (payload) => {
+    if (!authenticatedUserId || !payload || typeof payload !== 'object') return;
+    const { recipientId, isTyping } = payload;
+    if (typeof recipientId !== 'string' || !recipientId.trim() || typeof isTyping !== 'boolean') return;
     socket.to(recipientId).emit('typing_status', { senderId: authenticatedUserId, isTyping });
   });
 
   // Real-time Messaging
-  socket.on('send_message', async ({ chatId, text }) => {
-    if (!authenticatedUserId) return;
+  socket.on('send_message', async (payload) => {
+    if (!authenticatedUserId || !payload || typeof payload !== 'object') return;
+    const { chatId, text } = payload;
+    if (typeof chatId !== 'string' || !chatId.trim() || typeof text !== 'string' || !text.trim() || text.length > 2000) return;
 
     try {
       const chat = db.chats.queryById(chatId);
@@ -518,8 +526,8 @@ io.on('connection', (socket) => {
       const wsMessage = {
         ...messageObj,
         sender: {
-          username: senderProfile.username,
-          role: senderProfile.role
+          username: senderProfile ? senderProfile.username : 'Unknown',
+          role: senderProfile ? senderProfile.role : 'user'
         }
       };
 
