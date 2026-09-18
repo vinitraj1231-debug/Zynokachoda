@@ -352,17 +352,28 @@ app.get('/api/messages/:chatId', authenticate, (req, res) => {
 // 10. Groups: Create group conversation
 app.post('/api/groups', authenticate, async (req, res) => {
   const { name, memberIds } = req.body;
-  if (!name || !Array.isArray(memberIds)) {
+  if (typeof name !== 'string' || !Array.isArray(memberIds)) {
     return res.status(400).json({ error: 'Group name and initial member array required.' });
   }
 
+  const trimmedName = name.trim();
+  if (trimmedName.length < 1 || trimmedName.length > 100) {
+    return res.status(400).json({ error: 'Group name must be between 1 and 100 characters.' });
+  }
+
+  const validMemberIds = memberIds.filter(id => typeof id === 'string' && id.trim().length > 0);
+  const existingValidMemberIds = validMemberIds.filter(id => {
+    const u = db.users.queryById(id);
+    return u && !u.isBanned;
+  });
+
   try {
     const groupId = uuidv4();
-    const groupMembers = [...new Set([req.user.id, ...memberIds])];
+    const groupMembers = [...new Set([req.user.id, ...existingValidMemberIds])];
 
     const newGroup = {
       id: groupId,
-      name,
+      name: trimmedName,
       memberIds: groupMembers,
       createdAt: new Date().toISOString()
     };
