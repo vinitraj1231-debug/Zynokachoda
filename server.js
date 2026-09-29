@@ -79,7 +79,7 @@ async function logAudit(userId, action, details = {}) {
 const SENSITIVE_FILES = new Set([
   'package.json', 'package-lock.json', 'server.js', 'render.yaml',
   '.gitignore', 'readme.md', 'supabase_setup.sql', 'requirements.txt',
-  'main.py', 'server.log', 'server_output.log', 'server_test.log', 'db.js', 'backend_test.js'
+  'main.py', 'server.log', 'server_output.log', 'server_test.log', 'db.js', 'backend_test.js', 'seed.js', 'pnpm-lock.yaml'
 ]);
 const FORBIDDEN_EXTENSIONS = ['.py', '.sql', '.yaml', '.log', '.env', '.json', '.bak'];
 
