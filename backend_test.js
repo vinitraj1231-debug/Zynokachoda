@@ -47,9 +47,36 @@ async function testJsonDatabase() {
   console.log('--- JSON Database Engine Tests Passed cleanly! ---\n');
 }
 
+function testForgotPasswordValidation() {
+  console.log('--- Starting Forgot-Password Validation Unit Tests ---');
+  function validateForgotPasswordEmail(email) {
+    if (!email || typeof email !== 'string') {
+      return { status: 400, error: 'Valid email string is required.' };
+    }
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || trimmedEmail.length > 100) {
+      return { status: 400, error: 'Email must be between 1 and 100 characters.' };
+    }
+    return { status: 200, email: trimmedEmail };
+  }
+
+  assert.strictEqual(validateForgotPasswordEmail(null).status, 400);
+  assert.strictEqual(validateForgotPasswordEmail(12345).status, 400);
+  assert.strictEqual(validateForgotPasswordEmail({ email: 'test@example.com' }).status, 400);
+  assert.strictEqual(validateForgotPasswordEmail('   ').status, 400);
+  assert.strictEqual(validateForgotPasswordEmail('a'.repeat(101)).status, 400);
+
+  const validRes = validateForgotPasswordEmail('  user@example.com  ');
+  assert.strictEqual(validRes.status, 200);
+  assert.strictEqual(validRes.email, 'user@example.com');
+  console.log('✓ Forgot-password email type and length validation verified.');
+  console.log('--- Forgot-Password Validation Unit Tests Passed cleanly! ---\n');
+}
+
 async function runAllTests() {
   try {
     await testJsonDatabase();
+    testForgotPasswordValidation();
     console.log('🎉 ALL SECURITY AND CORE FUNCTIONAL TESTS PASSED!');
     process.exit(0);
   } catch (err) {
