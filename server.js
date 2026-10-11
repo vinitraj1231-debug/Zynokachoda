@@ -271,11 +271,14 @@ app.get('/api/auth/session', authenticate, (req, res) => {
 });
 
 // 5. Auth: Reset / Forgot password dummy simulation with security logs
-app.post('/api/auth/forgot-password', async (req, res) => {
+app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
   const { email } = req.body;
-  if (!email) return res.status(400).json({ error: 'Email is required' });
+  if (!email || typeof email !== 'string' || email.trim().length === 0 || email.length > 100) {
+    return res.status(400).json({ error: 'Valid email is required (max 100 characters).' });
+  }
 
-  const user = db.users.read().find(u => u.email.toLowerCase() === email.toLowerCase());
+  const cleanEmail = email.trim().toLowerCase();
+  const user = db.users.read().find(u => u.email.toLowerCase() === cleanEmail);
   if (user) {
     await logAudit(user.id, 'password_reset_requested', { email });
   }
