@@ -26,13 +26,16 @@ app.add_middleware(
 )
 
 # 3. Security Constants
+# Prevent direct downloading of backend source code, lockfiles, and database scripts
 SENSITIVE_FILES = {
     'package.json', 'package-lock.json', 'server.js',
     'render.yaml', '.gitignore', 'readme.md',
     'supabase_setup.sql', 'requirements.txt', 'main.py',
-    'server.log', 'server_output.log', 'server_test.log'
+    'server.log', 'server_output.log', 'server_test.log',
+    'db.js', 'backend_test.js', 'seed.js', 'pnpm-lock.yaml'
 }
-FORBIDDEN_EXTENSIONS = ('.py', '.sql', '.yaml', '.log', '.env')
+# Block raw data stores (.json), backups (.bak), and server code execution/config files
+FORBIDDEN_EXTENSIONS = ('.py', '.sql', '.yaml', '.log', '.env', '.json', '.bak')
 
 def add_security_headers(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
