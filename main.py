@@ -26,13 +26,15 @@ app.add_middleware(
 )
 
 # 3. Security Constants
+# Block backend scripts, sensitive configurations, and internal data/backup files from static serving
 SENSITIVE_FILES = {
     'package.json', 'package-lock.json', 'server.js',
     'render.yaml', '.gitignore', 'readme.md',
     'supabase_setup.sql', 'requirements.txt', 'main.py',
-    'server.log', 'server_output.log', 'server_test.log'
+    'server.log', 'server_output.log', 'server_test.log',
+    'db.js', 'backend_test.js', 'seed.js', 'pnpm-lock.yaml'
 }
-FORBIDDEN_EXTENSIONS = ('.py', '.sql', '.yaml', '.log', '.env')
+FORBIDDEN_EXTENSIONS = ('.py', '.sql', '.yaml', '.log', '.env', '.json', '.bak')
 
 def add_security_headers(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
