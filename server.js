@@ -77,9 +77,9 @@ async function logAudit(userId, action, details = {}) {
 // ── SECURITY INTERCEPTOR ─────────────────────────────────────
 // Enforce block of raw sensitive files and server-side codes from public routes
 const SENSITIVE_FILES = new Set([
-  'package.json', 'package-lock.json', 'server.js', 'render.yaml',
+  'package.json', 'package-lock.json', 'pnpm-lock.yaml', 'server.js', 'render.yaml',
   '.gitignore', 'readme.md', 'supabase_setup.sql', 'requirements.txt',
-  'main.py', 'server.log', 'server_output.log', 'server_test.log', 'db.js', 'backend_test.js'
+  'main.py', 'server.log', 'server_output.log', 'server_test.log', 'db.js', 'backend_test.js', 'seed.js'
 ]);
 const FORBIDDEN_EXTENSIONS = ['.py', '.sql', '.yaml', '.log', '.env', '.json', '.bak'];
 
